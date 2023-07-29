@@ -221,6 +221,6 @@ Sub RightWallFollow
     EndIf
 EndSub
 
-Sub
-
+Sub LeftWallFollow
+    If 
 EndSub
