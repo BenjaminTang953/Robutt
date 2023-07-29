@@ -1,0 +1,201 @@
+motorArray[1] = "A"
+motorArray[2] = "B"
+motorArray[3] = "C"
+motorArray[4] = "D"
+moveSpeed = 30
+sensorSpeed = 20
+dropperSpeed = 20
+dropperTime = 50
+fixedTurn = idrk
+fixedMove = idrk
+maxDist1 = 250
+distSide = idrk
+distFront = idrk
+averageDirectTemp = idrk
+leftDirectTemp = 0
+rightDirectTemp = 0
+frontDirectTemp = 0
+wallCounter = idrk
+pelletCounter = 10
+isVictim = "False"
+lDist = 0
+rDist = 0
+fDist = 0
+moveDist = 0
+turnDist = idrk
+lowestDist = idrk
+knownDistSide = 10
+knownDistFront = 10
+lWall1 = "True"
+rWall1 = "True"
+fWall1 = "True"
+
+
+Sub lWall1Check
+    If maxDist1 > lDist Then
+        lWall1 = "True"
+    Else
+        lWall1 = "False"
+    EndIf
+EndSub
+
+Sub rWall1Check
+    If maxDist1 > rDist Then
+        rWall1 = "True"
+    Else
+        rWall1 = "False"
+    EndIf  
+EndSub 
+
+Sub fWall1Check
+    If maxDist1 > fDist Then
+        fWall1 = "True"
+    Else
+        fWall1 = "False"
+    EndIf  
+EndSub
+
+Sub VictimCheck
+    If isVictim = "True" Then
+        Sound.PlayBellRing()
+        VictimOperation()
+    Else
+        Sound.PlayBellRing()
+    EndIf
+EndSub
+
+Sub VictimOperation
+    If averageDirectTemp - 5 <= leftDirectTemp <= averageDirectTemp + 5 or averageDirectTemp - 5 <= rightDirectTemp <= averageDirectTemp + 5 or averageDirectTemp - 5 <= frontDirectTemp <= averageDirectTemp + 5 Then
+        If pelletCounter > 0 Then
+            DropperMove()
+            pelletCounter = pelletCounter - 1
+        EndIf
+    EndIf
+EndSub
+
+Sub DropperMove
+    Motor.Move("A", dropperSpeed, dropperTime, "True")
+EndSub
+
+Sub MotorMoveSync
+  For i = 1 to 4
+    If motorArray[i] = "C" Or motorArray[i] = "D" then
+      Motor.Start(motorArray[i], -baseSpeed*neg)
+    Else
+      Motor.Start(motorArray[i], baseSpeed*neg)
+    EndIf
+  EndFor
+EndSub
+
+Sub MotorMoveSide
+  For i = 1 to 4
+    If motorArray[i] = "B" Or motorArray[i] = "D" then
+      Motor.Start(motorArray[i], -baseSpeed*neg)
+    Else
+      Motor.Start(motorArray[i], baseSpeed*neg)
+    EndIf
+  EndFor
+EndSub
+
+Sub MotorTurn
+  For i = 1 to 4
+    If motorArray[i] = "A" Or motorArray[i] = "D" then
+      Motor.Start(motorArray[i], -baseSpeed*neg)
+    Else
+      Motor.Start(motorArray[i], baseSpeed*neg)
+    EndIf
+  EndFor
+EndSub
+
+Sub rlAdjustment
+    If lDist > rDist Then
+        While lDist > rDist
+            neg = 1
+            MotorMoveSide()
+        EndWhile
+    Else
+        While lDist < rDist 
+            neg = -1
+            MotorMoveSide()
+    EndIf
+EndSub
+
+Sub rAdjustment
+    moveDist = knownDistSide - rDist
+    If rDist > knownDistSide Then
+        neg = 1
+    Else
+        neg = -1
+    EndIf
+    While moveDist <> 0 
+        MotorMoveSide()
+        moveDist = knownDistSide - rDist
+    EndWhile
+EndSub
+
+Sub lAdjustment
+    moveDist = knownDistSide - lDist
+    If lDist > knownDistSide Then
+        neg = -1
+    Else
+        neg = 1
+    EndIf
+    While moveDist <> 0 
+        MotorMoveSide()
+        moveDist = knownDistSide - lDist
+    EndWhile
+EndSub
+
+Sub fAdjustment
+    moveDist = knownDistFront - fDist
+    If fDist > knownDistFront Then
+        neg = 1
+    Else
+        neg = -1
+    EndIf
+    While moveDist <> 0
+        MotorMoveSync()
+        moveDist = knownDistFront - fDist
+    EndWhile
+EndSub  
+
+
+Sub RightWallFollow
+    If rWall1 = "True" Then
+        If lWall1 = "True" Then
+            If fWall1 = "True" Then
+                BackMove()
+            Else
+                rlAdjustment()
+                FrontMove()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                rAdjustment()
+                fAdjustment()
+                LeftMove()
+            Else
+                rAdjustment()
+                FrontMove()
+            EndIf
+        EndIf
+    Else
+        If lWall1 = "True" Then
+            If fWall1 = "True" Then
+                lAdjustment()
+                fAdjustment()
+                RightMove()
+            Else
+                lAdjustment()
+                RightMove()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                fAdjustment()
+                RightMove()
+            Else
+                RightMove()
+            EndIf
+        EndIf
+    EndIf
+EndSub
