@@ -225,5 +225,6 @@ Sub LeftWallFollow
     If lWall1 = "True" Then
         If rWall1 = "True" Then
             If fWall1 = "True" Then
-                
+                BackMove()
+                FourMotorsBreak()
 EndSub
