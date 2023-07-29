@@ -222,5 +222,8 @@ Sub RightWallFollow
 EndSub
 
 Sub LeftWallFollow
-    If 
+    If lWall1 = "True" Then
+        If rWall1 = "True" Then
+            If fWall1 = "True" Then
+                
 EndSub
