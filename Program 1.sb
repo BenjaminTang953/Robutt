@@ -114,7 +114,7 @@ Sub MotorTurn 'No clue what this does Riley
   EndFor
 EndSub
 
-Sub rlAdjustment 'Adjustment by left and right wall
+Sub RLAdjustment 'Adjustment by left and right wall
     If lDist > rDist Then
         While lDist > rDist
             neg = 1
@@ -130,7 +130,7 @@ Sub rlAdjustment 'Adjustment by left and right wall
     EndIf
 EndSub
 
-Sub rAdjustment 'Adjustment off right wall
+Sub RAdjustment 'Adjustment off right wall
     moveDist = knownDistSide - rDist
     If rDist > knownDistSide Then
         neg = 1
@@ -144,7 +144,7 @@ Sub rAdjustment 'Adjustment off right wall
     FourMotorsBreak()
 EndSub
 
-Sub lAdjustment 'Adjustment off left wall
+Sub LAdjustment 'Adjustment off left wall
     moveDist = knownDistSide - lDist
     If lDist > knownDistSide Then
         neg = -1
@@ -158,7 +158,7 @@ Sub lAdjustment 'Adjustment off left wall
     FourMotorsBreak()
 EndSub
 
-Sub fAdjustment 'Adjustment off front wall
+Sub FAdjustment 'Adjustment off front wall
     moveDist = knownDistFront - fDist
     If fDist > knownDistFront Then
         neg = 1
@@ -180,18 +180,22 @@ Sub RightWallFollow
                 BackMove()
                 FourMotorsBreak()
             Else
-                rlAdjustment()
+                RLAdjustment()
+                FourMotorsBreak()
                 FrontMove()
                 FourMotorsBreak()
             EndIf
         Else
             If fWall1 = "True" Then
-                rAdjustment()
-                fAdjustment()
+                RAdjustment()
+                FourMotorsBreak()
+                FAdjustment()
+                FourMotorsBreak()
                 LeftMove()
                 FourMotorsBreak()
             Else
-                rAdjustment()
+                RAdjustment()
+                FourMotorsBreak()
                 FrontMove()
                 FourMotorsBreak()
             EndIf
@@ -199,18 +203,22 @@ Sub RightWallFollow
     Else
         If lWall1 = "True" Then
             If fWall1 = "True" Then
-                lAdjustment()
-                fAdjustment()
+                LAdjustment()
+                FourMotorsBreak()
+                FAdjustment()
+                FourMotorsBreak()
                 RightMove()
                 FourMotorsBreak()
             Else
-                lAdjustment()
+                LAdjustment()
+                FourMotorsBreak()
                 RightMove()
                 FourMotorsBreak()
             EndIf
         Else
             If fWall1 = "True" Then
-                fAdjustment()
+                FAdjustment()
+                FourMotorsBreak()
                 RightMove()
                 FourMotorsBreak()
             Else
@@ -227,4 +235,33 @@ Sub LeftWallFollow
             If fWall1 = "True" Then
                 BackMove()
                 FourMotorsBreak()
-EndSub
+            Else
+                RLAdjustment()
+                FourMotorsBreak()
+                FrontMove()
+                FourMotorsBreak()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                LAdjustment()
+                FourMotorsBreak()
+                FAdjustment()
+                FourMotorsBreak()
+                RightMove()
+                FourMotorsBreak()
+            Else
+                LAdjustment()
+                FourMotorsBreak()
+                FrontMove()
+            EndIf
+        EndIf
+    Else
+        If rWall1 = "True" Then
+            If fWall1 = "True" Then
+                RAdjustment()
+                FourMotorsBreak()
+                FAdjustment()
+                LeftMove()
+                FourMotorsBreak()
+
+EndSub      
