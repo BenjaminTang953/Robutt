@@ -1,0 +1,76 @@
+'Victim Detection.
+
+Finished = "False"
+
+LCD.Clear()
+
+'InfraRed
+irPort = 1
+irAddr = 21
+irReg = 68
+irWriteByte = 1 + 0
+irWriteData = Vector.Init(irWriteByte, irReg)
+irReadByte = 2
+irReadData = Vector.Init(irReadByte, 0)
+
+'Time of flight  
+tofPort = 2
+tofAddr = 1
+tofReg = 66
+tofWriteByte = 1 + 0
+tofWriteData = Vector.Init(tofWriteByte, tofReg)
+tofReadByte = 2
+tofReadData = Vector.Init(tofReadByte, 0)
+
+'Camera
+camPort = 3
+camAddr = 1
+camReg = 66
+camWriteByte = 1 + 0
+camWriteData = Vector.Init(camWriteByte, camReg)
+camReadByte = 1
+camReadData = Vector.Init(camReadByte, 0)
+
+sub SensorRead
+  irReadData = Sensor.CommunicateI2C(irPort, irAddr, irWriteByte, irReadByte, irWriteData)
+  targetTemp = (irReadData[1]*256 + irReadData[0]) / 100.0
+  
+  tofReadData = Sensor.CommunicateI2C(tofPort,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  targetDist = (tofReadData[1]*256 + tofReadData[0]) / 10.0
+  
+  camReadData = Sensor.CommunicateI2C(camPort, camAddr, camWriteByte, camReadByte, camWriteData)
+  numObjects = camReadData[0]
+EndSub
+
+SensorRead()
+
+averageDirectTemp = targetTemp
+wallCounter = 1
+writing = ""
+
+
+While Finished = "False"
+  SensorRead()
+  If targetTemp <= averageDirectTemp + 2.5 Then
+    averageDirectTemp = ((averageDirectTemp * wallCounter) + targetTemp)/(wallCounter+1)
+    wallCounter = wallCounter + 1
+  Else
+    heat = "True"
+  EndIf
+  If numObjects > 0 then
+    If heat = "true" Then 
+      writing = "Alive Body"
+    Else
+      writing = "Dead Body"
+    EndIf
+  Else
+    writing = "Wall"
+  EndIf 
+  LCD.Write(40, 50, "Status   : " + writing)
+  LCD.Write(40, 60, "Distance : " + targetDist)
+  LCD.Write(40, 70, "Temp Av  : " + averageDirectTemp)
+  
+  
+EndWhile
+
+

@@ -1,0 +1,63 @@
+'  ** I2C Read **
+
+'  By David Musgrave
+
+'  http://WinthropDC.com
+
+'  Last Modified: 10-Apr-2017
+
+' IR Address = 21
+'TOF address = 1
+''Camera ddress = 
+
+Finished = "False"
+Clicks = ""
+Value = 0
+
+I2CPort = 3
+I2CAddr = 1
+I2CAddrOld = -1
+
+I2CReg = 66
+While Finished = "False"
+  If I2CAddr <> I2CAddrOld then
+    LCD.Clear()
+    LCD.Write( 0*8, 0*10, "I2C Sensor Read")
+    LCD.Write( 0*8, 2*10, "Port: " + I2CPort)
+    LCD.Write(10*8, 2*10, "Address: " + I2CAddr)
+    I2CAddrOld = I2CAddr
+  EndIf
+
+  I2CWriteByte = 1 + 0
+  I2CWriteData = Vector.Init(I2CWriteByte, I2CReg)
+  I2CReadByte = 1
+  I2CReadData = Vector.Init(I2CReadByte, 0)
+
+  I2CReadData = Sensor.CommunicateI2C(I2CPort, I2CAddr, I2CWriteByte, I2CReadByte, I2CWriteData)
+
+  For x = 1 To I2CReadByte
+    LCD.Write(0*8, (x+3)*10, Text.GetSubText("  "+(I2CReg+x-1),Text.GetLength((I2CReg+x-1)),3) + ":")
+    LCD.Write(6*8, (x+3)*10, Text.GetSubText("  "+I2CReadData[x-1],Text.GetLength(I2CReadData[x-1]),3))
+    
+  EndFor
+  Value = (I2CReadData[1]*256 + I2CReadData[0])
+  LCD.Write(0*8, (I2CReadByte+5)*10, "Data: "+ Text.GetSubText("    "+(Value),Text.GetLength((Value)),5))
+  
+  Clicks = Buttons.GetClicks()
+  If Text.IsSubText(Clicks, "E") Then
+    Finished = "True"
+  EndIf
+  If Text.IsSubText(Clicks, "U") Then
+    I2CAddr = Math.Min(127, I2CAddr + 1)
+  EndIf
+  If Text.IsSubText(Clicks, "D") Then
+    I2CAddr = Math.Max(0, I2CAddr - 1)
+  EndIf
+  If Text.IsSubText(Clicks, "R") Then
+    I2CReg = Math.Min(254, I2CReg + 2)
+  EndIf
+  If Text.IsSubText(Clicks, "L") Then
+    I2CReg = Math.Max(0, I2CReg - 2)
+  EndIf
+EndWhile 
+  
