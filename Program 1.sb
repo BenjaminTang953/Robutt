@@ -271,7 +271,14 @@ Sub LeftWallFollow 'Not Finished Yet :/
             EndIf
         Else
             If fWall1 = "True" Then
-                
-
-
+                FAdjustment()
+                FourMotorsBreak()
+                LeftMove()
+                FourMotorsBreak()
+            Else
+                LeftMove()
+                FourMotorsBreak()
+            EndIf
+        EndIf
+    EndIf
 EndSub      
