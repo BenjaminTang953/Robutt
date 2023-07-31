@@ -41,7 +41,7 @@ Sub MotorTurn '1 is left
   EndFor
 EndSub
 
-sub RightMove
+Sub RightMove
   Motor.ResetCount("A")
   neg = -1
   MotorTurn()
