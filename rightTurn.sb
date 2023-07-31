@@ -1,0 +1,55 @@
+'Turns
+
+radius = 3
+distanceFudge = 0
+circumference = radius*2*Math.Pi
+degreeDistance = circumference/360
+fixedMove = 30/degreeDistance
+'////////////////////////////////////////
+'VALUE BELOW
+fixedTurn = 50 'ADJUST THIS VALUE
+'VALUE ABOVE
+'/////////////////////////////////////////
+
+Sub MotorMoveSync '1 is foward
+  For i = 1 to 4
+    If motorArray[i] = "C" Or motorArray[i] = "D" then
+      Motor.Start(motorArray[i], -baseSpeed*neg)
+    Else
+      Motor.Start(motorArray[i], baseSpeed*neg)
+    EndIf
+  EndFor
+EndSub
+
+Sub MotorMoveSide '1 is right
+  For i = 1 to 4
+    If motorArray[i] = "B" Or motorArray[i] = "D" then
+      Motor.Start(motorArray[i], -baseSpeed*neg)
+    Else
+      Motor.Start(motorArray[i], baseSpeed*neg)
+    EndIf
+  EndFor
+EndSub
+
+Sub MotorTurn '1 is left
+  For i = 1 to 4
+    If motorArray[i] = "A" Or motorArray[i] = "D" then
+      Motor.Start(motorArray[i], -baseSpeed*neg)
+    Else
+      Motor.Start(motorArray[i], baseSpeed*neg)
+    EndIf
+  EndFor
+EndSub
+
+sub RightMove
+  Motor.ResetCount("A")
+  neg = -1
+  MotorTurn()
+  While Motor.GetCount("A") <= fixedTurn
+  EndWhile
+  Motor.Stop("ABCD", "True")
+EndSub
+
+RightMove()
+  
+  
