@@ -7,7 +7,7 @@ degreeDistance = circumference/360
 fixedMove = 30/degreeDistance
 '////////////////////////////////////////
 'VALUE BELOW
-fixedTurn = 50 'ADJUST THIS VALUE
+fixedTurn = 320 'ADJUST THIS VALUE
 'VALUE ABOVE
 '/////////////////////////////////////////
 
@@ -51,5 +51,4 @@ Sub RightMove
 EndSub
 
 RightMove()
-  
   
