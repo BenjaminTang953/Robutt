@@ -74,9 +74,9 @@ Sub VictimOperation 'Dropping the pellet
         If pelletCounter > 0 Then
             DropperMove() 'Move the dropper
             pelletCounter = pelletCounter - 1 'Change the Counter
+        Else
+            Sound.PlayBellRing() 'Acknowledge dead x x victim
         EndIf
-    Else
-        Sound.PlayBellRing() 'Acknowledge dead x x victim
     EndIf
 EndSub
 
@@ -229,7 +229,7 @@ Sub RightWallFollow
     EndIf
 EndSub
 
-Sub LeftWallFollow 'Not Finished Yet :/
+Sub LeftWallFollow 
     If lWall1 = "True" Then
         If rWall1 = "True" Then
             If fWall1 = "True" Then
