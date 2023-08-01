@@ -1,4 +1,7 @@
 'All lines are commented for Riley's benefit as Ben's coding is too stupid'
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+'Fixed Values
 motorArray[1] = "A" 'Front Left
 motorArray[2] = "B" 'Front Right
 motorArray[3] = "C" 'Back Left
@@ -6,17 +9,23 @@ motorArray[4] = "D" 'Back Right
 moveSpeed = 30 'Moving Speed
 sensorSpeed = 20 'Sensor Block Moving Speed
 dropperSpeed = 20 'Dropper Moving Speed
-dropperTime = 50 ' How Long The Dropper Moves For
-fixedTurn = idrk 
-fixedMove = idrk
+dropperTime = 0.12 ' How Long The Dropper Moves For
+fixedTurn = 320 'Turning distance, get past first wall
+radius = 3 ' radius of wheel
+distanceFudge = 0 'Fudge factor for moving foward
+circumference = radius*2*Math.Pi ' Circumference of wheel
+degreeDistance = circumference/360 ' Distance of one degree
+fixedMove = (30/degreeDistance)+distanceFudge ' Degrees to move one tile
 maxDist1 = 250 'Max Distance The Wall Should Be If It Is 1 Wall Away (Directly In Front)
-distSide = idrk
-distFront = idrk
-averageDirectTemp = idrk 'Average Temp Of Non Body Walls
+
+'Readings in Code
+distSide = 0 ' Distace of side wall for adjustments
+distFront = 0 ' Distance of front wall for adjustments
+averageDirectTemp = 0 'Average Temp Of Non Body Walls
 leftDirectTemp = 0 'Temp Of Left Wall
 rightDirectTemp = 0 'Temp Of Right Wall
 frontDirectTemp = 0 'Temp of Front Wall
-wallCounter = idrk 
+wallCounter = 0 ' counter of walls seen, for averag temp
 pelletCounter = 10 'How Many Pellets Left
 isVictim = "False" 'Does Camera See Victim
 tempVariance = 10 'Range For Dead Or Alive Victim In Temp
@@ -24,8 +33,7 @@ lDist = 0 'Dist To Left Wall
 rDist = 0 'Dist To Right Wall
 fDist = 0 'Dist To Front Wall
 moveDist = 0 'Distance Needed for Adjustment
-turnDist = idrk 
-lowestDist = idrk
+lowestDist = 0 ' lowest distance from the wall
 knownDistSide = 15.2 'How Far From Wall The Robot Should Be From Side
 knownDistFront = 11.6 'How Far From Wall The Robot Should Be From Front
 lWall1 = "True" 'Is There A Left Wall
@@ -173,7 +181,13 @@ Sub FAdjustment 'Adjustment off front wall
 EndSub  
 
 Sub FrontMove
-    
+    Motor.ResetCount("A")
+    neg = -1
+    MotorMoveSync()
+    While Motor.GetCount("A") <= fixedMove
+    EndWhile
+    FourMotorsBreak()
+EndSub      
 
 
 Sub RightWallFollow
