@@ -1,4 +1,4 @@
-'All lines are commented for Riley's benefit as Ben's coding is too stupid :D'
+'All lines are commented for Riley's benefit as Ben's coding is too stupid'
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 ' VARIABLE INIT
@@ -14,11 +14,11 @@ sensorSpeed = 100 'Sensor Block Moving Speed
 dropperSpeed = 20 'Dropper Moving Speed
 dropperTime = 0.12 ' How Long The Dropper Moves For
 fixedTurn = 435 'Turning distance, get past first wall
-radius = 3 ' radius of wheel
+radius = 30 ' radius of wheel
 distanceFudge = 0 'Fudge factor for moving foward
 circumference = radius*2*Math.Pi ' Circumference of wheel
 degreeDistance = circumference/360 ' Distance of one degree
-fixedMove = (30/degreeDistance)+distanceFudge ' Degrees to move one tile
+fixedMove = (300/degreeDistance)+distanceFudge ' Degrees to move one tile
 maxDist1 = 250 'Max Distance The Wall Should Be If It Is 1 Wall Away (Directly In Front)
 tempVariance = 2.5
 baseSpeed = moveSpeed
@@ -40,8 +40,8 @@ rDist = 0 'Dist To Right Wall
 fDist = 0 'Dist To Front Wall
 moveDist = 0 'Distance Needed for Adjustment
 lowestDist = 0 ' lowest distance from the wall
-knownDistSide = 15.2 'How Far From Wall The Robot Should Be From Side
-knownDistFront = 11.6 'How Far From Wall The Robot Should Be From Front
+knownDistSide = 152 'How Far From Wall The Robot Should Be From Side
+knownDistFront = 116 'How Far From Wall The Robot Should Be From Front
 lWall1 = "True" 'Is There A Left Wall
 rWall1 = "True" 'Is There A Right Wall
 fWall1 = "True" 'Is There A Front Wall
@@ -227,8 +227,8 @@ sub RightMove
   Motor.ResetCount("A")
   neg = -1
   MotorTurn()
-  If fWall1 = "True" Then
-    While Motor.GetCount("A") <= (fixedTurn-200)
+  If fWall1 = "True" and isVictim = "False" Then
+    While Motor.GetCount("A") <= (fixedTurn-175)
     EndWhile
     PreciseTurnR()
   Else
@@ -284,12 +284,12 @@ Sub LeftMove
   neg = 1
   MotorTurn()
   
-  If lWall1 = "True" Then
-    While Motor.GetCount("A") <= (fixedTurn-200)
+  If lWall1 = "True" and isVictim = "False" Then
+    While Motor.GetCount("A") >= -1*(fixedTurn-200)
     EndWhile
     PreciseTurnL()
   Else
-    While Motor.GetCount("A") <= fixedTurn
+    While Motor.GetCount("A") >= -1*fixedTurn
     EndWhile
   EndIf
   
@@ -342,7 +342,7 @@ Sub BackMove
   neg = 1
   MotorTurn()
   
-  While Motor.GetCount("A") <= ((fixedTurn-200) * 2)
+  While Motor.GetCount("A") >= -1*((fixedTurn-200) * 2)
   EndWhile
   PreciseTurnB()
   
@@ -386,65 +386,55 @@ Sub PreciseTurnB
 EndSub
 
 'WALL ADJUSTMENTS
-Sub RLAdjustment 'Adjustment by left and right wall
-    If lDist > rDist Then
-        While lDist > rDist
-            neg = 1
-            MotorMoveSide()
-        EndWhile
-        FourMotorsBreak()
-    Else
-        While lDist < rDist 
-            neg = -1
-            MotorMoveSide()
-        EndWhile   
-        FourMotorsBreak()
-    EndIf
-EndSub
 
 Sub RAdjustment 'Adjustment off right wall
     moveDist = knownDistSide - rDist
-    If rDist > knownDistSide Then
-        neg = 1
-    Else
+    If Math.Abs(moveDist) = moveDist Then
         neg = -1
+    Else
+        neg = 1
     EndIf
-    While moveDist > 0 
-        MotorMoveSide()
-        moveDist = knownDistSide - rDist
-    EndWhile
+    Motor.ResetCount("A")
+    moveDeg = math.Abs(moveDist)/degreeDistance
+    MotorMoveSync()
+    While math.Abs(Motor.GetCount("A")) < moveDeg
+    EndWhile    
     FourMotorsBreak()
 EndSub
 
 Sub LAdjustment 'Adjustment off left wall
-    moveDist = knownDistSide - lDist
-    If lDist > knownDistSide Then
-        neg = -1
-    Else
+    moveDist = knownDistSide -lDist
+    
+    If Math.Abs(moveDist) = moveDist Then
         neg = 1
+    Else
+        neg = -1
     EndIf
-    While moveDist > 0 
-        MotorMoveSide()
-        moveDist = knownDistSide - lDist
-    EndWhile
+    Motor.ResetCount("A")
+    moveDeg = math.Abs(moveDist)/degreeDistance
+    MotorMoveSync()
+    While math.Abs(Motor.GetCount("A")) < moveDeg
+    EndWhile    
     FourMotorsBreak()
 EndSub
 
 Sub FAdjustment 'Adjustment off front wall
     moveDist = knownDistFront - fDist
-    If fDist > knownDistFront Then
+    moveDist = moveDist - (50*degreeDistance)
+    If math.abs(moveDist) = moveDist  Then
         neg = 1
     Else
         neg = -1
     EndIf
-    While moveDist > 0
-        MotorMoveSync()
-        moveDist = knownDistFront - fDist
-    EndWhile
+    Motor.ResetCount("A")
+    moveDeg = math.Abs(moveDist)/degreeDistance
+    MotorMoveSync()
+    While math.Abs(Motor.GetCount("A")) < moveDeg
+    EndWhile    
     FourMotorsBreak()
 EndSub  
 
-'MULTI MOTOR OPERATION - I2C ADRESSES TAKEN FROM WINTHROP.DC/ROBOTICS
+'MULTI MOTOR OPERATION
  
 Sub MWriteCommand
   I2CMotReg = 65 ' 0x41 Write Command
@@ -587,6 +577,20 @@ Sub AverageTempAdjust 'Adjust average temp
 EndSub
 
 Sub SensorGathering 'Gather 3 sets of data 
+  'foward
+  objectTotal = 0
+  M1Speed = sensorSpeed
+  SensorRead()
+  AverageTempAdjust()
+  fDist = targetDist
+  frontDirectTemp = targetTemp
+  
+  fWall1Check()
+  
+  If fWall1 = "True" Then
+    objectTotal = objectTotal + numObjects
+  EndIf
+  
   'right
   M1Speed = sensorSpeed
   M1Seconds = 1
@@ -601,9 +605,7 @@ Sub SensorGathering 'Gather 3 sets of data
   rWall1Check()
   
   If rWall1 = "True" Then
-    objectTotal = numObjects
-  Else
-    objectTotal = 0
+    objectTotal = objectTotal+numObjects
   EndIf
   
   'left
@@ -625,23 +627,12 @@ Sub SensorGathering 'Gather 3 sets of data
     objectTotal = objectTotal + numObjects
   EndIf
   
-  'foward
   M1Speed = sensorSpeed
   M1Seconds = 1
   M1Start()
-  Program.Delay(148)
+  Program.Delay(140)
   M1Stop()
   Program.Delay(50)
-  SensorRead()
-  AverageTempAdjust()
-  fDist = targetDist
-  frontDirectTemp = targetTemp
-  
-  fWall1Check()
-  
-  If fWall1 = "True" Then
-    objectTotal = objectTotal + numObjects
-  EndIf
   
   If objectTotal > 0 Then
     isVictim = "True"
@@ -660,22 +651,22 @@ Sub RightWallFollow
                 BackMove()
                 FourMotorsBreak()
             Else
-                'RLAdjustment()
-                'FourMotorsBreak()
+                RAdjustment()
+                FourMotorsBreak()
                 FrontMove()
                 FourMotorsBreak()
             EndIf
         Else
             If fWall1 = "True" Then
-                'RAdjustment()
-                'FourMotorsBreak()
-                'FAdjustment()
-                'FourMotorsBreak()
+                RAdjustment()
+                FourMotorsBreak()
+                FAdjustment()
+                FourMotorsBreak()
                 LeftMove()
                 FourMotorsBreak()
             Else
-                'RAdjustment()
-                'FourMotorsBreak()
+                RAdjustment()
+                FourMotorsBreak()
                 FrontMove()
                 FourMotorsBreak()
             EndIf
@@ -684,21 +675,21 @@ Sub RightWallFollow
         If lWall1 = "True" Then
             If fWall1 = "True" Then
                 'LAdjustment()
-                'FourMotorsBreak()
-                'FAdjustment()
-                'FourMotorsBreak()
+                FourMotorsBreak()
+                FAdjustment()
+                FourMotorsBreak()
                 RightMove()
                 FourMotorsBreak()
             Else
                 'LAdjustment()
-                'FourMotorsBreak()
+                FourMotorsBreak()
                 RightMove()
                 FourMotorsBreak()
             EndIf
         Else
             If fWall1 = "True" Then
-                'FAdjustment()
-                'FourMotorsBreak()
+                FAdjustment()
+                FourMotorsBreak()
                 RightMove()
                 FourMotorsBreak()
             Else
@@ -711,6 +702,7 @@ EndSub
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 'MAIN CODE
+running = "True"
 While Done = "False"
   If running = "True" then
     SensorGathering()
