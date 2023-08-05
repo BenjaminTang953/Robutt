@@ -228,7 +228,7 @@ sub RightMove
   neg = -1
   MotorTurn()
   If fWall1 = "True" and isVictim = "False" Then
-    While Motor.GetCount("A") <= (fixedTurn-175)
+    While Motor.GetCount("A") <= (fixedTurn-140)
     EndWhile
     PreciseTurnR()
   Else
@@ -395,9 +395,9 @@ Sub RAdjustment 'Adjustment off right wall
         neg = 1
     EndIf
     Motor.ResetCount("A")
-    moveDeg = math.Abs(moveDist)/degreeDistance
-    MotorMoveSync()
+    moveDeg = math.Abs(moveDist)/degreeDistance*1.1
     While math.Abs(Motor.GetCount("A")) < moveDeg
+      MotorMoveSide()
     EndWhile    
     FourMotorsBreak()
 EndSub
@@ -412,7 +412,7 @@ Sub LAdjustment 'Adjustment off left wall
     EndIf
     Motor.ResetCount("A")
     moveDeg = math.Abs(moveDist)/degreeDistance
-    MotorMoveSync()
+    MotorMoveSide()
     While math.Abs(Motor.GetCount("A")) < moveDeg
     EndWhile    
     FourMotorsBreak()
@@ -420,7 +420,7 @@ EndSub
 
 Sub FAdjustment 'Adjustment off front wall
     moveDist = knownDistFront - fDist
-    moveDist = moveDist - (50*degreeDistance)
+    moveDist = moveDist - (46*degreeDistance)
     If math.abs(moveDist) = moveDist  Then
         neg = 1
     Else
@@ -758,6 +758,7 @@ EndSub
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 'MAIN CODE
 running = "True"
+rightFollow = "True"
 While Done = "False"
   If running = "True" then
     SensorGathering()
