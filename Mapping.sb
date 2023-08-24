@@ -44,6 +44,74 @@ Sub VictimToHex
     EndIf
 EndSub
 
+Sub WallConstruction
+    wallTotal = 0
+    If northWall = "True" Then
+        wallTotal = wallTotal + 1
+    EndIf
+    If eastWall = "True" Then
+        wallTotal = wallTotal + 2
+    EndIf
+    If southWall = "True" Then
+        wallTotal = wallTotal + 4
+    EndIf
+    If westWall = "True" Then
+        wallTotal = wallTotal + 8
+    EndIf
+    wallCount = wallTotal
+EndSub
+
 Sub WallOrientation
+    If wallCount > 9 Then
+        If wallCount = "A" Then
+            wallCount = 10
+        EndIf
+        If wallCount = "B" Then
+            wallCount = 11
+        EndIf
+        If wallCount = "C" Then
+            wallCount = 12
+        EndIf
+        If wallCount = "D" Then
+            wallCount = 13
+        EndIf
+        If wallCount = "E" Then
+            wallCount = 14
+        EndIf
+        If wallCount = "F" Then
+            wallCount = 15
+        EndIf
+    EndIf
+    If wallCount - 8 => 0 Then
+        westWall = "True"
+        wallCount = wallCount - 8
+        If  wallCount - 4 => 0 Then
+            southWall = "True"
+            wallCount = wallCount - 4
+            If wallCount - 2 => 0 Then 
+                eastWall = "True"
+                wallCount = wallCount - 2
+                If wallCount - 1 => 0 Then
+                    northWall = "True"
+                    wallCount = wallCount + 8 + 4 + 2 + 1
+                Else
+                    northWall = "False"
+                    wallCount = wallCount + 8 + 4 + 2
+                EndIf
+            Else
+                eastWall = "False"
+                If wallCount - 1 => 0 Then
+                    northWall = "True"
+                    wallCount = wallCount + 8 + 4 + 1
+                Else
+                    northWall = "False"
+                    wallCount = wallCount + 8 + 4 
+                EndIf
+            EndIf
+        Else
+            southWall = "False"    
+
+    EndIf
+
 
 EndSub
