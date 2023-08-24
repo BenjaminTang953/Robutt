@@ -1,0 +1,49 @@
+Sub WallToHex
+    If wallCount > 9 Then 
+        If wallCount = 10 Then
+            wallCount = "A"
+        EndIf
+        If wallCount = 11 Then
+            wallCount = "B"
+        EndIf
+        If wallCount = 12 Then
+            wallCount = "C"
+        EndIf
+        If wallCount = 13 Then
+            wallCount = "D"
+        EndIf
+        If wallCount = 14 Then
+            wallCount = "E"
+        EndIf
+        If wallCount = 15 Then
+            wallCount = "F"
+        EndIf
+    EndIf
+EndSub
+
+Sub VictimToHex
+    If victimCount > 9 Then 
+        If victimCount = 10 Then
+            victimCount = "A"
+        EndIf
+        If victimCount = 11 Then
+            victimCount = "B"
+        EndIf
+        If victimCount = 12 Then
+            victimCount = "C"
+        EndIf
+        If victimCount = 13 Then
+            victimCount = "D"
+        EndIf
+        If victimCount = 14 Then
+            victimCount = "E"
+        EndIf
+        If victimCount = 15 Then
+            victimCount = "F"
+        EndIf
+    EndIf
+EndSub
+
+Sub WallOrientation
+
+EndSub
