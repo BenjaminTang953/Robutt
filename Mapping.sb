@@ -89,7 +89,7 @@ Sub WallOrientation
             southWall = "True"
             wallCount = wallCount - 4
             If wallCount - 2 => 0 Then 
-                eastWall = "True"
+                3eastWall = "True"
                 wallCount = wallCount - 2
                 If wallCount - 1 => 0 Then
                     northWall = "True"
