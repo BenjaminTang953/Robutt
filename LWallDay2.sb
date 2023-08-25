@@ -1,0 +1,927 @@
+'All lines are commented for Riley's benefit as Ben's coding is too stupid'
+
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+' VARIABLE INIT
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+'Fixed Values
+motorArray[1] = "A" 'Front Left
+motorArray[2] = "B" 'Front Right
+motorArray[3] = "C" 'Back Left
+motorArray[4] = "D" 'Back Right
+moveSpeed = 30 'Moving Speed
+sensorSpeed = 100 'Sensor Block Moving Speed
+dropperSpeed = 20 'Dropper Moving Speed
+dropperTime = 0.23 ' How Long The Dropper Moves For
+fixedTurn = 435 'Turning distance, get past first wall
+radius = 30 ' radius of wheel
+distanceFudge = -20 'Fudge factor for moving foward
+circumference = radius*2*Math.Pi ' Circumference of wheel
+degreeDistance = circumference/360 ' Distance of one degree
+fixedMove = (300/degreeDistance)+distanceFudge ' Degrees to move one tile
+maxDist1 = 165 'Max Distance The Wall Should Be If It Is 1 Wall Away (Directly In Front)
+tempVariance = 2.5
+baseSpeed = moveSpeed
+Done = "False"
+drive = "True"
+
+'Readings in Code
+distSide = 0 ' Distace of side wall for adjustments
+distFront = 0 ' Distance of front wall for adjustments
+averageDirectTemp = 19 'Average Temp Of Non Body Walls
+leftDirectTemp = 0 'Temp Of Left Wall
+rightDirectTemp = 0 'Temp Of Right Wall
+frontDirectTemp = 0 'Temp of Front Wall
+wallCounter = 0 ' counter of walls seen, for averag temp
+pelletCounter = 10 'How Many Pellets Left
+isVictim = "False" 'Does Camera See Victim
+tempVariance = 10 'Range For Dead Or Alive Victim In Temp
+lDist = 0 'Dist To Left Wall
+rDist = 0 'Dist To Right Wall
+fDist = 0 'Dist To Front Wall
+moveDist = 0 'Distance Needed for Adjustment
+lowestDist = 0 ' lowest distance from the wall
+knownDistSide = 152 'How Far From Wall The Robot Should Be From Side
+knownDistFront = 116 'How Far From Wall The Robot Should Be From Front
+lWall1 = "True" 'Is There A Left Wall
+rWall1 = "True" 'Is There A Right Wall
+fWall1 = "True" 'Is There A Front Wall
+targetDist = 0
+targetTemp = 0
+numObjects = 0
+neg = 1
+
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+' I2C  INIT
+
+'InfraRed
+irPort = 1
+irAddr = 21
+irReg = 68
+irWriteByte = 1 + 0
+irWriteData = Vector.Init(irWriteByte, irReg)
+irReadByte = 2
+irReadData = Vector.Init(irReadByte, 0)
+
+'Time of flight  
+tofPort = 2
+tofAddr = 1
+tofReg = 66
+tofWriteByte = 1 + 0
+tofWriteData = Vector.Init(tofWriteByte, tofReg)
+tofReadByte = 2
+tofReadData = Vector.Init(tofReadByte, 0)
+
+'Camera
+camPort = 3
+camAddr = 1
+camReg = 66
+camWriteByte = 1 + 0
+camWriteData = Vector.Init(camWriteByte, camReg)
+camReadByte = 1
+camReadData = Vector.Init(camReadByte, 0)
+
+'MultiMotor Init
+I2CMotPort = 1
+I2CMotAddr = 3
+I2CMotReg = 0
+I2CMotWriteByte = 0
+I2CMotWriteData = Vector.Init(2, 0)
+I2CMotReadByte = 0
+I2CMotReadData = Vector.Init(2, 0)
+ 
+M1Rotations = 0
+M2Rotations = 0
+MVoltage = 0
+MCommand = 0
+M1Rotate = 0
+M2Rotate = 0
+M1Speed = sensorSpeed
+M2Speed = -dropperSpeed
+M1Seconds = 0
+M2Seconds = 0.12
+M1Brake = 1 '  1 = Brake, 0 = Float
+M2Brake = 1 '  1 = Brake, 0 = Float
+M1Ramp = 1 ' 1 = Ramp, 0 = No Ramp
+M2Ramp = 1 ' 1 = Ramp, 0 = No Ramp
+M1Wait = 0 ' 1 = Wait For Completion
+M2Wait = 0 ' 1 = Wait For Completion
+M1Status = 0
+M2Status = 0
+M1StatusBits = Vector.Init(8, 0)
+M2StatusBits = Vector.Init(8, 0)
+M1StatusString = "SRPCBOTL"
+M2StatusString = "SRPCBOTL"
+ 
+MRotate = 0
+MStatus = 0
+bits = 0
+
+'SENSOR INIT
+
+'vector initializing
+red = 0
+green = 1
+blue = 2
+
+blackRead = Vector.Init(3,0)
+whiteRead = Vector.Init(3,0)
+maxRead = Vector.Init(3,0)
+rgbNorm = Vector.Init(3,0)
+normReading = Vector.Init(3,0)
+silverDif = 1.2
+blackNorm = 8
+blackCounter = 0
+startCounter = 0
+blackTile = "False"
+
+whiteRead[red] = 180
+whiteRead[green] = 140
+whiteRead[blue] = 190
+
+
+'Reading
+Sensor.SetMode(2,0)
+Sensor.SetMode(4,4)
+read=Sensor.ReadRaw(4,3)
+
+
+For i = 0 to 2
+  blackRead[i] = whiteRead[i]/8
+EndFor 
+
+'Init
+For i = 0 to 2
+  maxRead[i] = whiteRead[i]
+  colFactor[i] = maxRead[i]/blackRead[i]/2
+  minRead[i] = maxRead[i]/colFactor[i]
+EndFor
+
+
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+'MAIN CODE
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+'WALL LOGIC
+Sub lWall1Check 'Checking For Left Wall
+    If maxDist1 > lDist Then 'If The Dist To Left Wall Is Less Than The Extreme In 1 Tile
+        lWall1 = "True" 'Then There Is Wall
+    Else 'If Not
+        lWall1 = "False" 'Then There Is No Wall
+    EndIf
+EndSub
+
+
+Sub rWall1Check 'Same as left wall but for right wall
+    If maxDist1 > rDist Then
+        rWall1 = "True"
+    Else
+        rWall1 = "False"
+    EndIf  
+EndSub 
+
+Sub fWall1Check 'Once again but for front wall
+    If maxDist1 > fDist Then
+        fWall1 = "True"
+    Else
+        fWall1 = "False"
+    EndIf  
+EndSub
+
+'VICTIM LOGIC
+Sub VictimCheck 'Can the camera see a victim either dead or alive
+    If isVictim = "True" Then 'If it can
+        Speaker.Note(50,"C4",500) 'Acknowledge the victim
+        Program.Delay(500)
+        VictimOperation() 'Drop pellet thing
+    EndIf
+EndSub
+
+Sub VictimOperation 'Dropping the pellet
+    If ((averageDirectTemp + 2.5) <= leftDirectTemp) Then 'If any of the 3 sides has an alive victim within a range of the average temp
+        If pelletCounter > 0 Then
+            DropperMove() 'Move the dropper
+            pelletCounter = pelletCounter - 1 'Change the Counter
+        EndIf
+    ElseIf ((averageDirectTemp + 2.5) <= rightDirectTemp) then
+        If pelletCounter > 0 Then
+            DropperMove() 'Move the dropper
+            pelletCounter = pelletCounter - 1 'Change the Counter
+        EndIf
+    elseif ((averageDirectTemp + 2.5) <= frontDirectTemp) then
+        If pelletCounter > 0 Then
+            DropperMove() 'Move the dropper
+            pelletCounter = pelletCounter - 1 'Change the Counter
+        EndIf  
+    Else
+        Speaker.Note(50,"A4",500) 'Acknowledge dead x x victim
+    EndIf
+EndSub
+
+Sub DropperMove 'Move the dropper thing
+  M2Seconds = 2
+  M2Start()
+  Program.Delay(dropperTime*1000)
+  M2Stop()
+  Program.Delay(1000)
+EndSub
+
+'MOTOR MOVEMENT
+Sub MotorMoveSync 'Move forwards, +neg = forward, -neg = back
+  For i = 1 to 4
+    If motorArray[i] = "C" Or motorArray[i] = "D" then
+      Motor.Start(motorArray[i], -baseSpeed*neg)
+    Else
+      Motor.Start(motorArray[i], baseSpeed*neg)
+    EndIf
+  EndFor
+EndSub
+
+Sub MotorMoveSide 'Move left or right, +neg = right, -neg = left
+  For i = 1 to 4
+    If motorArray[i] = "B" Or motorArray[i] = "D" then
+      Motor.Start(motorArray[i], -baseSpeed*neg)
+    Else
+      Motor.Start(motorArray[i], baseSpeed*neg)
+    EndIf
+  EndFor
+EndSub
+
+Sub MotorTurn 'rotate on spot, +neg = left, -neg = right.
+  For i = 1 to 4
+    If motorArray[i] = "A" Or motorArray[i] = "D" then
+      Motor.Start(motorArray[i], -baseSpeed*neg)
+    Else
+      Motor.Start(motorArray[i], baseSpeed*neg)
+    EndIf
+  EndFor
+EndSub
+
+Sub FourMotorsBreak 'Stop all motors
+    For i = 1 to 4
+        Motor.Stop(motorArray[i], "True")
+    EndFor
+EndSub
+
+'NAVIGATION
+Sub FrontMove
+  Motor.ResetCount("A")
+  neg = 1
+  MotorMoveSync()
+  drive = "True"
+  colorRead()
+  While drive = "True"
+    colorRead()
+    If Motor.GetCount("A") > (fixedMove - 50) Then
+      drive = "False"
+    EndIf
+    If blackTile = "True" then
+      If Motor.GetCount("A") > 20 then
+        drive = "False"
+        Speaker.Note(20,"C4", 1000)
+      EndIf
+    endif
+  EndWhile
+  
+  If blackTile = "True" Then
+    neg = -1
+    MotorMoveSync()
+    While motor.GetCount("A") > 0
+    EndWhile
+    Motor.ResetCount("A")
+    neg = 1
+    MotorTurn()
+    While Motor.GetCount("A") >= -1*(fixedTurn*2)
+    EndWhile
+  EndIf
+  FourMotorsBreak()
+EndSub  
+
+sub RightMove
+  M1Reset()
+  M1Speed = -sensorSpeed
+  M1Seconds = 2
+  M1Start()
+  Program.Delay(1200)
+  M1Stop()
+  M1Seconds = 1
+  
+  Motor.ResetCount("A")
+  neg = -1
+  MotorTurn()
+  If fWall1 = "True" and isVictim = "False" Then
+    While Motor.GetCount("A") <= (fixedTurn-80)
+    EndWhile
+    PreciseTurnR()
+  Else
+    While Motor.GetCount("A") <= fixedTurn
+    EndWhile
+  EndIf
+  Motor.Stop("ABCD", "True")
+  
+  M1Speed = sensorSpeed
+  M1Start()
+  Program.Delay(148)
+  M1Stop()
+  baseSpeed = moveSpeed
+  FrontMove()
+EndSub
+
+Sub PreciseTurnR
+  finished = "False"
+  SensorRead() 
+  lowestDist = targetDist
+  While finished = "False"
+    SensorRead()
+    If targetDist < lowestDist then
+      lowestDist = targetDist
+    Else 
+      finished = "True"
+    EndIf
+  EndWhile
+  
+  finished = "False"
+  neg = 1
+  MotorTurn()
+  SensorRead() 
+  lowestDist = targetDist
+  baseSpeed = 0.1 * moveSpeed
+  While finished = "False"
+    SensorRead()
+    If targetDist <= lowestDist then
+      lowestDist = targetDist
+    Else
+      finished = "True"
+    EndIf
+  EndWhile
+EndSub
+
+Sub LeftMove
+  'right
+  M1Speed = sensorSpeed
+  M1Seconds = 2
+  M1Start()
+  Program.Delay(1200)
+  M1Stop()
+  
+  Motor.ResetCount("A")
+  neg = 1
+  MotorTurn()
+  
+  If lWall1 = "True" and isVictim = "False" Then
+    While Motor.GetCount("A") >= -1*(fixedTurn-80)
+    EndWhile
+    PreciseTurnL()
+  Else
+    While Motor.GetCount("A") >= -1*fixedTurn
+    EndWhile
+  EndIf
+  
+  Motor.Stop("ABCD", "True")
+  M1Speed = -sensorSpeed
+  M1Seconds = 2
+  
+  M1Start()
+  Program.Delay(146)
+  M1Stop()
+  
+  baseSpeed = moveSpeed
+  FrontMove()
+EndSub
+
+Sub PreciseTurnL
+  finished = "False"
+  SensorRead() 
+  lowestDist = targetDist
+  While finished = "False"
+    SensorRead()
+    If targetDist < lowestDist then
+      lowestDist = targetDist
+    Else 
+      finished = "True"
+    EndIf
+  EndWhile
+  
+  finished = "False"
+  neg = -1
+  MotorTurn()
+  SensorRead() 
+  lowestDist = targetDist
+  baseSpeed = 0.1 * moveSpeed
+  While finished = "False"
+    SensorRead()
+    If targetDist <= lowestDist then
+      lowestDist = targetDist
+    Else
+      finished = "True"
+    EndIf
+  EndWhile
+EndSub
+
+Sub BackMove
+  Speaker.Note(100, "C4", 500)
+  M1Speed = -sensorSpeed
+  M1Seconds = 2
+  M1Start()
+  Program.Delay(1200)
+  M1Stop()
+  
+  Motor.ResetCount("A")
+  neg = -1
+  MotorTurn()
+  
+  While math.Abs(Motor.GetCount("A")) <= ((fixedTurn-20) * 2)
+  EndWhile
+  PreciseTurnB()
+  
+  Motor.Stop("ABCD", "True")
+  M1Speed = sensorSpeed
+  M1Start()
+  Program.Delay(147)
+  M1Stop()
+  
+  baseSpeed = moveSpeed
+  FrontMove()
+EndSub
+
+Sub PreciseTurnB
+  finished = "False"
+  SensorRead() 
+  lowestDist = targetDist
+  While finished = "False"
+    SensorRead()
+    If targetDist < lowestDist then
+      lowestDist = targetDist
+    Else 
+      finished = "True"
+    EndIf
+  EndWhile
+  
+  finished = "False"
+  neg = 1
+  MotorTurn()
+  SensorRead() 
+  lowestDist = targetDist
+  baseSpeed = 0.1 * moveSpeed
+  While finished = "False"
+    SensorRead()
+    If targetDist <= lowestDist then
+      lowestDist = targetDist
+    Else
+      finished = "True"
+    EndIf
+  EndWhile
+EndSub
+
+'WALL ADJUSTMENTS
+
+Sub RAdjustment 'Adjustment off right wall
+    moveDist = knownDistSide - rDist
+    If Math.Abs(moveDist) = moveDist Then
+        neg = -1
+    Else
+        neg = 1
+    EndIf
+    Motor.ResetCount("A")
+    moveDeg = math.Abs(moveDist)/degreeDistance
+    MotorMoveSide()
+    While math.Abs(Motor.GetCount("A")) < moveDeg
+    EndWhile    
+    FourMotorsBreak()
+EndSub
+
+Sub LAdjustment 'Adjustment off left wall
+    moveDist = knownDistSide -lDist - 10
+    
+    If Math.Abs(moveDist) = moveDist Then
+        neg = 1
+    Else
+        neg = -1
+    EndIf
+    Motor.ResetCount("A")
+    moveDeg = math.Abs(moveDist)/degreeDistance
+    MotorMoveSide()
+    While math.Abs(Motor.GetCount("A")) < moveDeg
+    EndWhile    
+    FourMotorsBreak()
+EndSub
+
+Sub FAdjustment 'Adjustment off front wall
+    moveDist = knownDistFront - fDist
+    moveDist = moveDist - (12*degreeDistance)
+    If math.abs(moveDist) = moveDist  Then
+        neg = 1
+        Motor.ResetCount("A")
+        moveDeg = math.Abs(moveDist)/degreeDistance
+        MotorMoveSync()
+        While math.Abs(Motor.GetCount("A")) < moveDeg
+        EndWhile    
+        FourMotorsBreak()
+    Else
+        neg = -1
+    EndIf
+EndSub  
+
+'MULTI MOTOR OPERATION
+ 
+Sub MWriteCommand
+  I2CMotReg = 65 ' 0x41 Write Command
+  I2CMotWriteByte = 1 + 1
+  I2CMotWriteData = Vector.Init(I2CMotWriteByte, I2CMotReg)
+  I2CMotWriteData[1] = MCommand
+  I2CMotReadByte = 1
+  I2CMotReadData = Vector.Init(I2CMotReadByte, 0)
+ 
+  I2CMotReadData = Sensor.CommunicateI2C(I2CMotPort, I2CMotAddr, I2CMotWriteByte, I2CMotReadByte, I2CMotWriteData)
+EndSub
+ 
+Sub M1Start
+  I2CMotReg = 66 ' 0x42 Write Parameters of Motor 1
+  I2CMotWriteByte = 1 + 8
+  I2CMotWriteData = Vector.Init(I2CMotWriteByte, I2CMotReg)
+  MRotate = M1Rotate
+  If MRotate > 0 then
+    I2CMotWriteData[4] = Math.Floor(MRotate/16777216)
+    MRotate = MRotate - Math.Floor(MRotate/16777216)
+    I2CMotWriteData[3] = Math.Floor(MRotate/65536)
+    MRotate = MRotate - Math.Floor(MRotate/65536)
+    I2CMotWriteData[2] = Math.Floor(MRotate/256)
+    MRotate = MRotate - Math.Floor(MRotate/256)
+    I2CMotWriteData[1] = MRotate
+  Else
+    MRotate = -MRotate
+    I2CMotWriteData[4] = 255-Math.Floor(MRotate/16777216)
+    MRotate = MRotate - Math.Floor(MRotate/16777216)
+    I2CMotWriteData[3] = 255-Math.Floor(MRotate/65536)
+    MRotate = MRotate - Math.Floor(MRotate/65536)
+    I2CMotWriteData[2] = 255-Math.Floor(MRotate/256)
+    MRotate = MRotate - Math.Floor(MRotate/256)
+    I2CMotWriteData[1] = 255-MRotate
+  EndIf
+  I2CMotWriteData[5] = M1Speed
+  I2CMotWriteData[6] = M1Seconds
+  I2CMotWriteData[7] = 0 ' Command Register B
+  I2CMotWriteData[8] = 0 ' Command Register A
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 1 * 1 ' Speed Control of your Motor
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 2 * M1Ramp ' Ramp the speed up or down
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 4 * 1 ' Relative change based on encoder values
+  If M1Rotate <> 0 Then
+    I2CMotWriteData[8] = I2CMotWriteData[8] + 8 * 1 ' Encoder control of your motor
+  EndIf
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 16 * M1Brake ' Brake or Float at the completion of motor movement
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 32 * 1 - M1Brake ' Encoder active feedback
+  If M1Seconds > 0 Then
+    I2CMotWriteData[8] = I2CMotWriteData[8] + 64 * 1 ' Timed control of your motor
+  EndIf 
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 128 * 1 ' Go
+  I2CMotReadByte = 1
+  I2CMotReadData = Vector.Init(I2CMotReadByte, 0)
+ 
+  I2CMotReadData = Sensor.CommunicateI2C(I2CMotPort, I2CMotAddr, I2CMotWriteByte, I2CMotReadByte, I2CMotWriteData) 
+EndSub
+
+Sub M2Start
+  I2CMotReg = 74 ' 0x4A Write Parameters of Motor 2
+  I2CMotWriteByte = 1 + 8
+  I2CMotWriteData = Vector.Init(I2CMotWriteByte, I2CMotReg)
+  MRotate = M2Rotate
+  If MRotate > 0 then
+    I2CMotWriteData[4] = Math.Floor(MRotate/16777216)
+    MRotate = MRotate - Math.Floor(MRotate/16777216)
+    I2CMotWriteData[3] = Math.Floor(MRotate/65536)
+    MRotate = MRotate - Math.Floor(MRotate/65536)
+    I2CMotWriteData[2] = Math.Floor(MRotate/256)
+    MRotate = MRotate - Math.Floor(MRotate/256)
+    I2CMotWriteData[1] = MRotate
+  Else
+    MRotate = -MRotate
+    I2CMotWriteData[4] = 255-Math.Floor(MRotate/16777216)
+    MRotate = MRotate - Math.Floor(MRotate/16777216)
+    I2CMotWriteData[3] = 255-Math.Floor(MRotate/65536)
+    MRotate = MRotate - Math.Floor(MRotate/65536)
+    I2CMotWriteData[2] = 255-Math.Floor(MRotate/256)
+    MRotate = MRotate - Math.Floor(MRotate/256)
+    I2CMotWriteData[1] = 255-MRotate
+  EndIf
+  I2CMotWriteData[5] = M2Speed
+  I2CMotWriteData[6] = M2Seconds
+  I2CMotWriteData[7] = 0 ' Command Register B
+  I2CMotWriteData[8] = 0 ' Command Register A
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 1 * 1 ' Speed Control of your Motor
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 2 * M2Ramp ' Ramp the speed up or down
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 4 * 1 ' Relative change based on encoder values
+  If M2Rotate <> 0 Then
+    I2CMotWriteData[8] = I2CMotWriteData[8] + 8 * 1 ' Encoder control of your motor
+  EndIf
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 16 * M2Brake ' Brake or Float at the completion of motor movement
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 32 * 1 - M2Brake ' Encoder active feedback
+  If M2Seconds > 0 Then
+    I2CMotWriteData[8] = I2CMotWriteData[8] + 64 * 1 ' Timed control of your motor
+  EndIf 
+  I2CMotWriteData[8] = I2CMotWriteData[8] + 128 * 1 ' Go
+  I2CMotReadByte = 1
+  I2CMotReadData = Vector.Init(I2CMotReadByte, 0)
+ 
+  I2CMotReadData = Sensor.CommunicateI2C(I2CMotPort, I2CMotAddr, I2CMotWriteByte, I2CMotReadByte, I2CMotWriteData)   
+EndSub
+
+Sub M1Stop
+  If M1Brake = 0 Then
+    MCommand = 97 ' 0x61 Motor 1: Float while stopping.
+  Else
+    MCommand = 65 ' 0x41 Motor 1: Brake while stopping.
+  EndIf 
+  MWriteCommand()
+EndSub
+ 
+Sub M2Stop
+  If M2Brake = 0 Then
+    MCommand = 98 ' 0x62 Motor 2: Float while stopping.
+  Else
+    MCommand = 66 ' 0x42 Motor 2: Brake while stopping.
+  EndIf 
+  MWriteCommand()
+EndSub
+
+Sub M1Reset
+  MCommand = 114 ' 0x72 Motor 1: Reset Encoder to zero
+  MWriteCommand()
+EndSub
+ 
+Sub M2Reset
+  MCommand = 115 ' 0x73 Motor 2: Reset Encoder to zero
+  MWriteCommand()
+EndSub
+ 
+Sub MReset
+  MCommand = 82 ' 0x52 Reset All Settings
+  MWriteCommand()
+EndSub
+
+'I2C SENSORS SUBS
+sub SensorRead 'Gather Data from each sensor
+  irReadData = Sensor.CommunicateI2C(irPort, irAddr, irWriteByte, irReadByte, irWriteData)
+  targetTemp = (irReadData[1]*256 + irReadData[0]) / 100.0
+  
+  tofReadData = Sensor.CommunicateI2C(tofPort,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  targetDist = (tofReadData[1]*256 + tofReadData[0]) - 30
+  
+  camReadData = Sensor.CommunicateI2C(camPort, camAddr, camWriteByte, camReadByte, camWriteData)
+  numObjects = camReadData[0]
+EndSub
+
+Sub AverageTempAdjust 'Adjust average temp
+  If targetTemp <= averageDirectTemp + 2.5 Then
+    averageDirectTemp = ((averageDirectTemp * wallCounter) + targetTemp)/(wallCounter+1)
+    wallCounter = wallCounter + 1
+  Else
+    heat = "True"
+  EndIf
+EndSub
+
+Sub SensorGathering 'Gather 3 sets of data 
+  'foward
+  objectTotal = 0
+  M1Speed = sensorSpeed
+  SensorRead()
+  AverageTempAdjust()
+  fDist = targetDist
+  frontDirectTemp = targetTemp
+  
+  fWall1Check()
+  
+  If fWall1 = "True" Then
+    objectTotal = objectTotal + numObjects
+  EndIf
+  
+  'right
+  M1Speed = sensorSpeed
+  M1Seconds = 2
+  M1Start()
+  Program.Delay(1200)
+  M1Stop()
+  Program.Delay(50)
+  SensorRead()
+  AverageTempAdjust()
+  rDist = targetDist
+  rightDirectTemp = targetTemp
+  rWall1Check()
+  
+  If rWall1 = "True" Then
+    objectTotal = objectTotal+numObjects
+  EndIf
+  
+  'left
+  M1Speed = -sensorSpeed
+  M1Seconds = 2
+  
+  M1Start()
+  Program.Delay(1200)
+  M1Stop()
+  Program.Delay(50)
+  SensorRead()
+  AverageTempAdjust()
+  lDist = targetDist
+  leftDirectTemp = targetTemp
+  
+  lWall1Check()
+  
+  If lWall1 = "True" Then
+    objectTotal = objectTotal + numObjects
+  EndIf
+  
+  M1Speed = sensorSpeed
+  M1Seconds = 1
+  M1Start()
+  Program.Delay(146)
+  M1Stop()
+  Program.Delay(50)
+  
+  If objectTotal > 0 Then
+    isVictim = "True"
+  Else
+    isVictim = "False"
+  EndIf
+EndSub
+
+'SENSOR SUBS
+sub colorRead
+  Sensor.SetMode(4,4)
+  read=Sensor.ReadRaw(4,3)
+  
+  For i = 0 To 2
+    if read[i] > maxRead[i] And read[i] < maxRead[i] * silverDif then
+      maxRead[i] = read[i]
+    EndIf
+    If read[i] < minRead[Green] then
+      minRead[i] = read[i]
+    EndIf
+  EndFor
+  
+  For i = 0 To 2
+    normReading[i] = 100*(read[i]-minRead[i])/(maxRead[i]-minRead[i])
+  EndFor
+  
+  blackCounter = 0
+  For i = 0 To 2
+    If normReading[i] < blackNorm Then
+      blackCounter = blackCounter + 1
+    EndIf
+  EndFor
+  
+  blackTile = "False"
+  If blackCounter = 3 Then
+    blackTile = "True"
+  EndIf
+EndSub
+
+'MAIN LOGIC
+Sub RightWallFollow
+    If rWall1 = "True" Then
+        If lWall1 = "True" Then
+            If fWall1 = "True" Then
+                BackMove()
+                FourMotorsBreak()
+            Else
+                RAdjustment()
+                FourMotorsBreak()
+                FrontMove()
+                FourMotorsBreak()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                RAdjustment()
+                FourMotorsBreak()
+                FAdjustment()
+                FourMotorsBreak()
+                LeftMove()
+                FourMotorsBreak()
+            Else
+                RAdjustment()
+                FourMotorsBreak()
+                FrontMove()
+                FourMotorsBreak()
+            EndIf
+        EndIf
+    Else
+        If lWall1 = "True" Then
+            If fWall1 = "True" Then
+                LAdjustment()
+                FourMotorsBreak()
+                FAdjustment()
+                FourMotorsBreak()
+                RightMove()
+                FourMotorsBreak()
+            Else
+                LAdjustment()
+                FourMotorsBreak()
+                RightMove()
+                FourMotorsBreak()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                FAdjustment()
+                FourMotorsBreak()
+                RightMove()
+                FourMotorsBreak()
+            Else
+                RightMove()
+                FourMotorsBreak()
+            EndIf
+        EndIf
+    EndIf
+EndSub
+  
+Sub LeftWallFollow 
+    If lWall1 = "True" Then
+        If rWall1 = "True" Then
+            If fWall1 = "True" Then
+                BackMove()
+                FourMotorsBreak()
+            Else
+                RAdjustment()
+                FourMotorsBreak()
+                FrontMove()
+                FourMotorsBreak()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                LAdjustment()
+                FourMotorsBreak()
+                FAdjustment()
+                FourMotorsBreak()
+                RightMove()
+                FourMotorsBreak()
+            Else
+                LAdjustment()
+                FourMotorsBreak()
+                FrontMove()
+            EndIf
+        EndIf
+    Else
+        If rWall1 = "True" Then
+            If fWall1 = "True" Then
+                RAdjustment()
+                FourMotorsBreak()
+                FAdjustment()
+                LeftMove()
+                FourMotorsBreak()
+            Else
+                RAdjustment()
+                FourMotorsBreak()
+                LeftMove()
+                FourMotorsBreak()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                FAdjustment()
+                FourMotorsBreak()
+                LeftMove()
+                FourMotorsBreak()
+            Else
+                LeftMove()
+                FourMotorsBreak()
+            EndIf
+        EndIf
+    EndIf
+EndSub  
+
+
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+'MAIN CODE
+running = "True"
+rightFollow = "False"
+While Done = "False"
+  If running = "True" then
+    SensorGathering()
+    colorRead()
+    Motor.ResetCount("A")
+    MotorMoveSync()
+    While Motor.GetCount("A") < 50
+    EndWhile
+    FourMotorsBreak()
+    VictimCheck()
+    If rightFollow = "True" then
+      RightWallFollow()
+    Else                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+      LeftWallFollow()
+    EndIf
+  EndIf      
+  Clicks = Buttons.GetClicks()
+  If Text.IsSubText(Clicks, "E") Then
+    If running = "True" Then
+      running = "False"
+      M1Stop()
+      M2Stop()
+      If rightFollow = "True" then
+        rightFollow = "False"
+      Else
+        rightFollow = "True"
+      EndIf
+    Else
+      running = "True"
+    EndIf
+  EndIf  
+EndWhile
+M1Stop()
+M2Stop()
