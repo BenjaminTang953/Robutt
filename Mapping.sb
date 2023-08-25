@@ -109,9 +109,196 @@ Sub WallOrientation
                 EndIf
             EndIf
         Else
-            southWall = "False"    
-
+            southWall = "False"
+            If wallCount - 2 => 0 Then 
+                eastWall = "True"
+                wallCount = wallCount - 2
+                If wallCount - 1 => 0 Then
+                    northWall = "True"
+                    wallCount = wallCount + 8 + 2 + 1
+                Else
+                    northWall = "False"
+                    wallCount = wallCount + 8 + 2
+                EndIf
+            Else
+                eastWall = "False"
+                If wallCount - 1 => 0 Then
+                    northWall = "True"
+                    wallCount = wallCount + 8 + 1
+                Else
+                    northWall = "False"
+                    wallCount = wallCount + 8 
+                EndIf
+            EndIf  
+        EndIf
+    Else
+        westWall = "False"
+        If  wallCount - 4 => 0 Then
+            southWall = "True"
+            wallCount = wallCount - 4
+            If wallCount - 2 => 0 Then 
+                eastWall = "True"
+                wallCount = wallCount - 2
+                If wallCount - 1 => 0 Then
+                    northWall = "True"
+                    wallCount = wallCount + 4 + 2 + 1
+                Else
+                    northWall = "False"
+                    wallCount = wallCount + 4 + 2
+                EndIf
+            Else
+                eastWall = "False"
+                If wallCount - 1 => 0 Then
+                    northWall = "True"
+                    wallCount = wallCount + 4 + 1
+                Else
+                    northWall = "False"
+                    wallCount = wallCount + 4 
+                EndIf
+            EndIf
+        Else
+            southWall = "False"
+            If wallCount - 2 => 0 Then 
+                eastWall = "True"
+                wallCount = wallCount - 2
+                If wallCount - 1 => 0 Then
+                    northWall = "True"
+                    wallCount = wallCount + 2 + 1
+                Else
+                    northWall = "False"
+                    wallCount = wallCount + 2
+                EndIf
+            Else
+                eastWall = "False"
+                If wallCount - 1 => 0 Then
+                    northWall = "True"
+                    wallCount = wallCount + 1
+                Else
+                    northWall = "False"
+                    wallCount = "Floating"
+                EndIf
+            EndIf  
+        EndIf 
     EndIf
+EndSub
 
-
+Sub VictimOrientation
+    If victimCount > 9 Then
+        If victimCount = "A" Then
+            victimCount = 10
+        EndIf
+        If victimCount = "B" Then
+            victimCount = 11
+        EndIf
+        If victimCount = "C" Then
+            victimCount = 12
+        EndIf
+        If victimCount = "D" Then
+            victimCount = 13
+        EndIf
+        If victimCount = "E" Then
+            victimCount = 14
+        EndIf
+        If victimCount = "F" Then
+            victimCount = 15
+        EndIf
+    EndIf
+    If victimCount - 8 => 0 Then
+        westVictim = "True"
+        victimCount = victimCount - 8
+        If  victimCount - 4 => 0 Then
+            southVictim = "True"
+            victimCount = victimCount - 4
+            If victimCount - 2 => 0 Then 
+                eastVictim = "True"
+                victimCount = victimCount - 2
+                If victimCount - 1 => 0 Then
+                    northVictim = "True"
+                    victimCount = victimCount + 8 + 4 + 2 + 1
+                Else
+                    northVictim = "False"
+                    victimCount = victimCount + 8 + 4 + 2
+                EndIf
+            Else
+                eastVictim = "False"
+                If victimCount - 1 => 0 Then
+                    northVictim = "True"
+                    victimCount = victimCount + 8 + 4 + 1
+                Else
+                    northVictim = "False"
+                    victimCount = victimCount + 8 + 4 
+                EndIf
+            EndIf
+        Else
+            southVictim = "False"
+            If victimCount - 2 => 0 Then 
+                eastVictim = "True"
+                victimCount = victimCount - 2
+                If victimCount - 1 => 0 Then
+                    northVictim = "True"
+                    victimCount = victimCount + 8 + 2 + 1
+                Else
+                    northVictim = "False"
+                    victimCount = victimCount + 8 + 2
+                EndIf
+            Else
+                eastVictim = "False"
+                If victimCount - 1 => 0 Then
+                    northVictim = "True"
+                    victimCount = victimCount + 8 + 1
+                Else
+                    northVictim = "False"
+                    victimCount = victimCount + 8 
+                EndIf
+            EndIf  
+        EndIf
+    Else
+        westVictim = "False"
+        If  victimCount - 4 => 0 Then
+            southVictim = "True"
+            victimCount = victimCount - 4
+            If victimCount - 2 => 0 Then 
+                eastVictim = "True"
+                victimCount = victimCount - 2
+                If victimCount - 1 => 0 Then
+                    northVictim = "True"
+                    victimCount = victimCount + 4 + 2 + 1
+                Else
+                    northVictim = "False"
+                    victimCount = victimCount + 4 + 2
+                EndIf
+            Else
+                eastVictim = "False"
+                If victimCount - 1 => 0 Then
+                    northVictim = "True"
+                    victimCount = victimCount + 4 + 1
+                Else
+                    northVictim = "False"
+                    victimCount = victimCount + 4 
+                EndIf
+            EndIf
+        Else
+            southVictim = "False"
+            If victimCount - 2 => 0 Then 
+                eastVictim = "True"
+                victimCount = victimCount - 2
+                If victimCount - 1 => 0 Then
+                    northVictim = "True"
+                    victimCount = victimCount + 2 + 1
+                Else
+                    northVictim = "False"
+                    victimCount = victimCount + 2
+                EndIf
+            Else
+                eastVictim = "False"
+                If victimCount - 1 => 0 Then
+                    northVictim = "True"
+                    victimCount = victimCount + 1
+                Else
+                    northVictim = "False"
+                    victimCount = 0
+                EndIf
+            EndIf  
+        EndIf 
+    EndIf
 EndSub
