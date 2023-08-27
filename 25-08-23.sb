@@ -939,6 +939,7 @@ timesVisited = 0
 wallHex = 0
 victimHex = 0
 trueDegree = 0
+trueBearing = ""
 trueDirection[1] = "North"
 trueDirection[2] = "East"
 trueDirection[3] = "South"
@@ -950,30 +951,35 @@ changeWallCalc[2] = 1
 changeWallCalc[3] = 2
 changeWallCalc[4] = -1
 differenceWallCalc = 0
+ 
+
 
 For i = 1 To 25
-    mapArray[i] = "000" * 25
+  mapArray[i] = "000" * 25
 EndFor
 
 For i = 1 To 4
-    wallCalcArray[i] = 2 ^ (i - 1)
+  wallCalcArray[i] = 2 ^ (i - 1)
 EndFor
 
 Sub WallCalculation
     For i = 1 To 4
+      If trueDirection[i] = trueBearing Then
         differenceWallCalc = changeWallCalc[i]
-        If differenceWallCalc + wallCalcArray[i] > 4 Then
-            wallCalcArray[i] = wallCalcArray[i] - 4
-        ElseIf differenceWallCalc + wallCalcArray[i] < 0 Then
-            wallCalcArray[i] = wallCalcArray + 4
-        EndFor
-        If fWall1 = "True" Then
-                If lWall1 = "True" Then
-                    If rWall1 = "True" Then
-                        wallTotal = wallCalcArray[1] + wallCalcArray[2] + wallCalcArray[4]
-                    Else
-                        wallTotal = wallCalcArray[1] + wallCalcArray[4]
-                    EndIf
-                Else
+        If wallCalcArray[i] + differenceWallCalc > 4 Then
+          wallCalcArray[i] = wallCalcArray[i - 4]
+        ElseIf wallCalcArray[i] + differenceWallCalc < 0 Then
+          wallCalcArray[i] = wallCalcArray[i + 4]
+        EndIf
+      If fWall1 = "True" Then
+        If lWall1 = "True" Then
+          If rWall1 = "True" Then
+          wallTotal = 
+      EndIf
+
+      
+
+
+
                     
 EndSub
