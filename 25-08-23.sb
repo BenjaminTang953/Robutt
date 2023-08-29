@@ -950,6 +950,9 @@ changeWallCalc[1] = 0
 changeWallCalc[2] = 1
 changeWallCalc[3] = 2
 changeWallCalc[4] = -1
+valueWallCalcArray[1] = 1
+valueWallCalcArray[2] = 2
+valueWallCalcArray[4] = 4
 differenceWallCalc = 0
  
 
@@ -966,15 +969,11 @@ Sub WallCalculation
     For i = 1 To 4
       If trueDirection[i] = trueBearing Then
         differenceWallCalc = changeWallCalc[i]
-        If wallCalcArray[i] + differenceWallCalc > 4 Then
-          wallCalcArray[i] = wallCalcArray[i - 4]
-        ElseIf wallCalcArray[i] + differenceWallCalc < 0 Then
-          wallCalcArray[i] = wallCalcArray[i + 4]
-        EndIf
+      EndIf
       If fWall1 = "True" Then
         If lWall1 = "True" Then
           If rWall1 = "True" Then
-          wallTotal = 
+          wallTotal = wallCalcArray[]
       EndIf
 
       
