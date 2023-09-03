@@ -954,8 +954,9 @@ valueWallCalcArray[1] = 1
 valueWallCalcArray[2] = 2
 valueWallCalcArray[4] = 4
 differenceWallCalc = 0
- 
-
+hexString = "0123456789ABCDEF"
+decString = "0123456789"
+decValue = 0 
 
 For i = 1 To 25
   mapArray[i] = "000" * 25
@@ -973,12 +974,55 @@ Sub WallCalculation
       If fWall1 = "True" Then
         If lWall1 = "True" Then
           If rWall1 = "True" Then
-          wallTotal = wallCalcArray[]
+            wallTotal = wallCalcArray[1 + differenceWallCalc] + wallCalcArray[2 + differenceWallCalc] + wallCalcArray[4 + differenceWallCalc]
+          Else
+            wallTotal = wallCalcArray[1 + differenceWallCalc] + wallCalcArray[4 + differenceWallCalc]
+          EndIf      
+        Else
+          If rWall1 = "True" Then
+            wallTotal = wallCalcArray[1 + differenceWallCalc] + wallCalcArray[4 + differenceWallCalc]
+          Else
+            wallTotal = wallCalcArray[1 + differenceWallCalc]
+          EndIf
+        EndIf
+      Else
+        If lWall1 = "True" Then
+          If rWall1 = "True" Then
+            wallTotal = wallCalcArray[2 + differenceWallCalc] + wallCalcArray[4 + differenceWallCalc]
+          Else
+            wallTotal = wallCalcArray[4 + differenceWallCalc]
+          EndIf
+        Else
+          If rWall1 = "True" Then
+            wallTotal = wallCalcArray[2 + differenceWallCalc]
+          Else
+            wallTotal = 0
+        EndIf
       EndIf
-
-      
-
-
-
-                    
+    EndFor
 EndSub
+
+Sub DecToHex
+decValue = Math.Remainder(decValue, 16)
+hexValue = Text.GetSubText(hexString, decValue + 1, 1)
+EndSub
+
+Sub HexToDec
+If hexValue > 9 Then
+  ElseIf hexValue = "A" Then
+    hexValue = 11
+  ElseIf hexValue = "B" Then
+    hexValue = 12
+  ElseIf hexValue = "C" Then
+    hexValue = 13
+  ElseIf hexValue = "D" Then
+    hexValue = 14
+  ElseIf hexValue = "E" Then
+    hexValue = 15
+  ElseIf hexValue = "F" Then
+    hexValue = 16
+EndIf
+hexValue = Math.Remainder(hexValue, 10)
+decValue = Text.GetSubText(decString, hexValue + 1,)
+EndSub
+
