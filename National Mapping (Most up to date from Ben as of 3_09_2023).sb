@@ -83,6 +83,10 @@ decValue = 0
 currentX = 0
 currentY = 0
 negLocation = 1
+north1Tile = mapArray[currentY - 1][currentX]
+east1Tile = mapArray[currentY][currentX + 1]
+south1Tile = mapArray[currentY + 1][currentX]
+west1Tile = mapArray[currentY][currentX - 1]
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 ' I2C  INIT
@@ -316,7 +320,7 @@ Sub FrontMove
         drive = "False"
         Speaker.Note(20,"C4", 1000)
       EndIf
-    endif
+    EndIf
   EndWhile
   
   If blackTile = "True" Then
@@ -333,7 +337,7 @@ Sub FrontMove
   FourMotorsBreak()
 EndSub  
 
-sub RightMove
+Sub RightMove
   M1Reset()
   M1Speed = -sensorSpeed
   M1Seconds = 2
@@ -698,7 +702,7 @@ Sub MReset
 EndSub
 
 'I2C SENSORS SUBS
-sub SensorRead 'Gather Data from each sensor
+Sub SensorRead 'Gather Data from each sensor
   irReadData = Sensor.CommunicateI2C(irPort, irAddr, irWriteByte, irReadByte, irWriteData)
   targetTemp = (irReadData[1]*256 + irReadData[0]) / 100.0
   
@@ -784,12 +788,12 @@ Sub SensorGathering 'Gather 3 sets of data
 EndSub
 
 'SENSOR SUBS
-sub colorRead
+Sub colorRead
   Sensor.SetMode(4,4)
   read=Sensor.ReadRaw(4,3)
   
   For i = 0 To 2
-    if read[i] > maxRead[i] And read[i] < maxRead[i] * silverDif then
+    If read[i] > maxRead[i] And read[i] < maxRead[i] * silverDif then
       maxRead[i] = read[i]
     EndIf
     If read[i] < minRead[Green] then
@@ -1013,7 +1017,7 @@ For i = 1 To 4
   EndIf
 EndSub
 
-Sub CenterRobot
+Sub CenterLocation
 currentX = centerX
 currentY = centerY
 EndSub
@@ -1021,16 +1025,55 @@ EndSub
 Sub VictimMapping
 If victimTrue = "True" Then
   mapArray[currentY][(currentX * 3) - 1] = 1
+Else
+  mapArray[currentY][(currentX * 3) - 1] = 0
 EndIf
 EndSub
 
+Sub FrequencyCalculation
+mapArray[currentY][(currentX * 3)] = mapArray[currentY][(currentX * 3)] + 1
+EndSub
+
+Sub SetStartFrequency
+mapArray[centerY][centerX * 3] = 1
+EndSub
+
+Sub WallArrayCalculation
+wallTotal = decValue
+DecToHex()
+mapArray[currentY][(currentX * 3) - 2] = hexValue
+EndSub
+
+Sub Preferential
+For i = 1 To 4
+  If trueDirection[i] = trueBearing Then
+    If i = 1 Then 
+    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
+    rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+    ElseIf i = 2 Then
+    frontTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+    rightTileFrequency = mapArray[currentY][currentX 3]
+    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+    ElseIf i = 3 Then
+    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
+    rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+    Else
+    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
+    rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+  EndIf
+
+
+EndSub
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 'MAIN CODE
 running = "True"
 rightFollow = "False"
 While Done = "False"
-  CenterRobot()
+  CenterLocation()
   If running = "True" then
     SensorGathering()
     colorRead()
