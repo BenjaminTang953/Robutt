@@ -87,6 +87,14 @@ north1Tile = mapArray[currentY - 1][currentX]
 east1Tile = mapArray[currentY][currentX + 1]
 south1Tile = mapArray[currentY + 1][currentX]
 west1Tile = mapArray[currentY][currentX - 1]
+minimumFrequency = 0
+movementPriority[1] = "Front"
+movementPriority[2] = "Right"
+movementPriority[3] = "Left"
+tileFrequency[1] = frontTileFrequency
+tileFrequency[2] = rightTileFrequency
+tileFrequency[3] = leftTileFrequency
+
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 ' I2C  INIT
@@ -974,6 +982,111 @@ Sub WallCalculation
     EndFor
 EndSub
 
+Sub CenterLocation
+currentX = centerX
+currentY = centerY
+EndSub
+
+Sub VictimMapping
+If victimTrue = "True" Then
+  mapArray[currentY][(currentX * 3) - 1] = 1
+Else
+  mapArray[currentY][(currentX * 3) - 1] = 0
+EndIf
+EndSub
+
+Sub FrequencyCalculation
+hexValue = mapArray[currentY][(currentX * 3)]
+HexToDec()
+If decValue <= 15 Then
+  mapArray[currentY][(currentX * 3)] = mapArray[currentY][(currentX * 3)] + 1
+EndIf
+EndSub
+
+Sub SetStartFrequency
+mapArray[centerY][centerX * 3] = 1
+EndSub
+
+Sub WallArrayCalculation
+decValue = wallTotal
+DecToHex()
+mapArray[currentY][(currentX * 3) - 2] = hexValue
+EndSub
+
+Sub LocationMapping
+For i = 1 To 4
+  If trueDirection[i] = trueBearing Then
+    If i = 1 Then
+    y = currentY + (1 * -negLocation)
+    x = currentX
+    ElseIf i = 2 Then
+    y = currentY
+    x = currentX + (1 * negLocation)
+    ElseIf i = 3 Then
+    y = currentY + (1 * negLocation)
+    x = currentX
+    Else
+    y = currentY
+    x = currentX + (1 * -negLocation) 
+  EndIf
+EndSub
+
+Sub Preferential
+For i = 1 To 4
+  If trueDirection[i] = trueBearing Then
+    If i = 1 Then 
+    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
+    rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+    ElseIf i = 2 Then
+    frontTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+    rightTileFrequency = mapArray[currentY + 1][currentX 3]
+    leftTileFrequency = mapArray[currentY - 1][currentX * 3]
+    ElseIf i = 3 Then
+    frontTileFrequency = mapArray[currentY + 1][currentX * 3]
+    rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+    leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+    Else
+    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
+    rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+    leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+  EndIf
+  PreferentialFollow()
+EndSub
+
+Sub PreferentialFollow
+If tileFrequency[1] <> tileFrequency[2] and tileFrequency[2] <> tileFrequency[3] Then 'If they all not equal :D
+  If tileFrequency[1] < tileFrequency[2] < tileFrequency[3] Then 'Front, Right, Left
+    For i = 1 To 3
+      movementPriority[i] = tileFrequency[i]
+    EndFor
+  ElseIf tileFrequency[1] < tileFrequency[3] < tileFrequency[2] Then 'Front, Left, Right
+    movementPriority[1] = tileFrequency[1]
+    movementPriority[2] = tileFrequency[3]
+    movementPriority[3] = tileFrequency[2]
+  ElseIf tileFrequency[2] < tileFrequency[1] < tileFrequency[3] Then 'Right, Front, Left
+    movementPriority[1] = tileFrequency[2]
+    movementPriority[2] = tileFrequency[1]
+    movementPriority[3] = tileFrequency[3]
+  ElseIf tileFrequency[2] < tileFrequency[3] < tileFrequency[1] Then 'Right, Left, Front
+    movementPriority[1] = tileFrequency[2]
+    movementPriority[2] = tileFrequency[3]
+    movementPriority[3] = tileFrequency[1]
+  ElseIf tileFrequency[3] < tileFrequency[1] < tileFrequency[2] Then 'Left, Front, Right
+    movementPriority[1] = tileFrequency[3]
+    movementPriority[2] = tileFrequency[1]
+    movementPriority[3] = tileFrequency[2]
+  ElseIf tileFrequency[3] < tileFrequency[2] < tileFrequency[1] Then 'Left, Right, Front
+    For i = 1 To 3
+      movementPriority[i] = tileFrequency[4 - i]
+    EndFor
+  EndIf
+EndIf
+
+
+
+EndSub
+
 'Math Calculation Subs
 Sub DecToHex
 decValue = Math.Remainder(decValue, 16)
@@ -999,74 +1112,8 @@ hexValue = Math.Remainder(hexValue, 10)
 decValue = Text.GetSubText(decString, hexValue + 1,)
 EndSub
 
-Sub LocationMapping
-For i = 1 To 4
-  If trueDirection[i] = trueBearing Then
-    If i = 1 Then
-    y = currentY + (1 * -negLocation)
-    x = currentX
-    ElseIf i = 2 Then
-    y = currentY
-    x = currentX + (1 * negLocation)
-    ElseIf i = 3 Then
-    y = currentY + (1 * negLocation)
-    x = currentX
-    Else
-    y = currentY
-    x = currentX + (1 * -negLocation) 
-  EndIf
-EndSub
-
-Sub CenterLocation
-currentX = centerX
-currentY = centerY
-EndSub
-
-Sub VictimMapping
-If victimTrue = "True" Then
-  mapArray[currentY][(currentX * 3) - 1] = 1
-Else
-  mapArray[currentY][(currentX * 3) - 1] = 0
-EndIf
-EndSub
-
-Sub FrequencyCalculation
-mapArray[currentY][(currentX * 3)] = mapArray[currentY][(currentX * 3)] + 1
-EndSub
-
-Sub SetStartFrequency
-mapArray[centerY][centerX * 3] = 1
-EndSub
-
-Sub WallArrayCalculation
-wallTotal = decValue
-DecToHex()
-mapArray[currentY][(currentX * 3) - 2] = hexValue
-EndSub
-
-Sub Preferential
-For i = 1 To 4
-  If trueDirection[i] = trueBearing Then
-    If i = 1 Then 
-    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
-    rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
-    ElseIf i = 2 Then
-    frontTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-    rightTileFrequency = mapArray[currentY][currentX 3]
-    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
-    ElseIf i = 3 Then
-    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
-    rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
-    Else
-    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
-    rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
-  EndIf
 
 
-EndSub
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 'MAIN CODE

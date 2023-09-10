@@ -1,0 +1,9 @@
+movementPriority[1] = 0
+movementPriority[2] = 0
+movementPriority[3] = 0
+
+For i = 1 To 3
+  movementPriority[i] = i
+EndFor
+
+TextWindow.Write(movementPriority[2])
