@@ -945,6 +945,11 @@ EndFor
 For i = 1 To 4
   wallCalcArray[i] = 2 ^ (i - 1)
 EndFor
+wallCalcArray[0] = wallCalcArray[0+4]
+wallCalcArray[5] = wallCalcArray[5-4]
+wallCalcArray[6] = wallCalcArray[6-4]
+
+
 
 Sub WallOrientationCalculation
     For i = 1 To 4
@@ -983,8 +988,101 @@ Sub WallOrientationCalculation
 EndSub
 
 Sub WallCalculation
-If wallTotal > 0 Then
-  
+currentWallLayout = mapArray[currentY][(currentX * 3) - 1]
+hexValue = currentWallLayout
+HexToDec()
+currentWallLayout = decValue
+wallCount = currentWallLayout
+If currentWallLayout > 0 Then
+  If wallCount - 8 >= 0 Then
+    westWall = "True"
+    wallCount = wallCount - 8
+    If  wallCount - 4 >= 0 Then
+      southWall = "True"
+      wallCount = wallCount - 4
+      If wallCount - 2 >= 0 Then 
+        eastWall = "True"
+        wallCount = wallCount - 2
+        If wallCount - 1 >= 0 Then
+          northWall = "True"
+        Else
+          northWall = "False"
+        EndIf
+      Else
+        eastWall = "False"
+        If wallCount - 1 >= 0 Then
+          northWall = "True"
+        Else
+          northWall = "False"
+        EndIf
+      EndIf
+    Else
+      southWall = "False"
+      If wallCount - 2 >= 0 Then 
+        eastWall = "True"
+        If wallCount - 1 >= 0 Then
+          northWall = "True"
+        Else
+          northWall = "False"
+        EndIf
+      Else
+        eastWall = "False"
+        If wallCount - 1 >= 0 Then
+          northWall = "True"
+        Else
+          northWall = "False"
+        EndIf
+      EndIf  
+    EndIf
+  Else
+    westWall = "False"
+    If wallCount - 4 >= 0 Then
+      southWall = "True"
+      wallCount = wallCount - 4
+      If wallCount - 2 >= 0 Then 
+        eastWall = "True"
+        wallCount = wallCount - 2
+        If wallCount - 1 >= 0 Then
+          northWall = "True"
+        Else
+          northWall = "False"
+        EndIf
+      Else
+        eastWall = "False"
+        If wallCount - 1 >= 0 Then
+          northWall = "True"
+        Else
+          northWall = "False"
+        EndIf
+      EndIf
+    Else
+      southWall = "False"
+      If wallCount - 2 >= 0 Then 
+        eastWall = "True"
+        wallCount = wallCount - 2
+        If wallCount - 1 >= 0 Then
+          northWall = "True"
+        Else
+          northWall = "False"
+        EndIf
+      Else
+        eastWall = "False"
+        If wallCount - 1 >= 0 Then
+          northWall = "True"
+        Else
+          northWall = "False"
+          wallCount = "Floating"
+        EndIf
+      EndIf
+    EndIf  
+  EndIf 
+Else
+  northWall = "False"
+  eastWall = "False"
+  southWall = "False"
+  westWall = "False"
+EndIf
+
 EndSub
 
 Sub CenterLocation
@@ -1036,7 +1134,7 @@ For i = 1 To 4
   EndIf
 EndSub
 
-Sub AdjacentFrequencyCalculation
+Sub AdjacentTileFrequencyCalculation
 For i = 1 To 4
   If trueDirection[i] = trueBearing Then
     If i = 1 Then 
@@ -1056,15 +1154,7 @@ For i = 1 To 4
     rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
     leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
   EndIf
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
 EndFor
-=======
->>>>>>> Stashed changes
-  PriorityCalculation()
-  PreferentialFollow()
->>>>>>> 43aa71f840a7968538a1aa35d8bfa6a0a981bf39
 EndSub
 
 Sub PriorityCalculation
