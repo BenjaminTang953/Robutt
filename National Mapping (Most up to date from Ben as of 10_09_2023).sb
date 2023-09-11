@@ -946,11 +946,12 @@ For i = 1 To 4
   wallCalcArray[i] = 2 ^ (i - 1)
 EndFor
 
-Sub WallCalculation
+Sub WallOrientationCalculation
     For i = 1 To 4
       If trueDirection[i] = trueBearing Then
         differenceWallCalc = changeWallCalc[i]
       EndIf
+    EndFor
       If fWall1 = "True" Then
         If lWall1 = "True" Then
           If rWall1 = "True" Then
@@ -979,7 +980,11 @@ Sub WallCalculation
             wallTotal = 0
         EndIf
       EndIf
-    EndFor
+EndSub
+
+Sub WallCalculation
+If wallTotal > 0 Then
+  
 EndSub
 
 Sub CenterLocation
@@ -1051,10 +1056,11 @@ For i = 1 To 4
     rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
     leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
   EndIf
+  PriorityCalculation()
   PreferentialFollow()
 EndSub
 
-Sub PreferentialFollow
+Sub PriorityCalculation
 If tileFrequency[1] <> tileFrequency[2] and tileFrequency[2] <> tileFrequency[3] Then 'If they all not equal :D
   If tileFrequency[1] < tileFrequency[2] < tileFrequency[3] Then 'Front, Right, Left
     For i = 1 To 3
@@ -1119,7 +1125,13 @@ If tileFrequency[1] = tileFrequency[2] Or tileFrequency[1] = tileFrequency[3] Or
     movementPriority[2] = tileFrequency[1]
     movementPriority[3] = tileFrequency[3]
   EndIf
-EndIf    
+EndIf
+EndSub
+
+Sub PreferentialFollow
+  
+  
+
 EndSub
 
 'Math Calculation Subs
