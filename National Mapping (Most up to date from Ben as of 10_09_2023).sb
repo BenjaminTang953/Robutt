@@ -1082,9 +1082,44 @@ If tileFrequency[1] <> tileFrequency[2] and tileFrequency[2] <> tileFrequency[3]
     EndFor
   EndIf
 EndIf
-
-
-
+If tileFrequency[1] = tileFrequency[2] Or tileFrequency[1] = tileFrequency[3] Or tileFrequency[2] = tileFrequency[3] Then 'If some/all are equal <(-_-<))
+  If tileFrequency[1] = tileFrequency[2] and tileFrequency[1] <> tileFrequency[3] Then 'Front and Right are like the same but the Left is different 
+    If tileFrequency[1] < tileFrequency[3] Then
+      movementPriority[1] = tileFrequency[2]
+      movementPriority[2] = tileFrequency[1]
+      movementPriority[3] = tileFrequency[3]
+    Else
+      movementPriority[1] = tileFrequency[3]
+      movementPriority[2] = tileFrequency[2]
+      movementPriority[3] = tileFrequency[1]
+    EndIf
+  ElseIf tileFrequency[1] = tileFrequency[3] and tileFrequency[1] <> tileFrequency[2] Then 'Front and Left are like the same but the Right is different  
+    If tileFrequency[1] < tileFrequency[2] Then
+      movementPriority[1] = tileFrequency[1]
+      movementPriority[2] = tileFrequency[3]
+      movementPriority[3] = tileFrequency[2]
+    Else
+      movementPriority[1] = tileFrequency[2]
+      movementPriority[2] = tileFrequency[1]
+      movementPriority[3] = tileFrequency[3]
+    EndIf
+  ElseIf tileFrequency[2] = tileFrequency[3] and tileFrequency[2] <> tileFrequency[1] Then 'Right and Left are like the same but the Front is different  
+    If tileFrequency[2] < tileFrequency[1] Then
+      movementPriority[1] = tileFrequency[2]
+      movementPriority[2] = tileFrequency[3]
+      movementPriority[3] = tileFrequency[1]
+    Else
+      movementPriority[1] = tileFrequency[1]
+      movementPriority[2] = tileFrequency[2]
+      movementPriority[3] = tileFrequency[3]
+    EndIf
+  EndIf
+  If tileFrequency[1] = tileFrequency[2] And tileFrequency[2] = tileFrequency[3] Then 'All the same
+    movementPriority[1] = tileFrequency[2]
+    movementPriority[2] = tileFrequency[1]
+    movementPriority[3] = tileFrequency[3]
+  EndIf
+EndIf    
 EndSub
 
 'Math Calculation Subs
