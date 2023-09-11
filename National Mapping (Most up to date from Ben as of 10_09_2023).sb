@@ -1036,7 +1036,7 @@ For i = 1 To 4
   EndIf
 EndSub
 
-Sub Preferential
+Sub AdjacentFrequencyCalculation
 For i = 1 To 4
   If trueDirection[i] = trueBearing Then
     If i = 1 Then 
@@ -1056,8 +1056,15 @@ For i = 1 To 4
     rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
     leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
   EndIf
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+EndFor
+=======
+>>>>>>> Stashed changes
   PriorityCalculation()
   PreferentialFollow()
+>>>>>>> 43aa71f840a7968538a1aa35d8bfa6a0a981bf39
 EndSub
 
 Sub PriorityCalculation
