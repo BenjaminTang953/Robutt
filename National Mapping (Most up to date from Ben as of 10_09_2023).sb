@@ -94,7 +94,9 @@ movementPriority[3] = "Left"
 tileFrequency[1] = frontTileFrequency
 tileFrequency[2] = rightTileFrequency
 tileFrequency[3] = leftTileFrequency
-
+movePossible[1] = "" 'Front move possible
+movePossible[2] = "" 'Right move possible
+movePossible[3] = "" 'Left move possible
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 ' I2C  INIT
@@ -1082,7 +1084,6 @@ Else
   southWall = "False"
   westWall = "False"
 EndIf
-
 EndSub
 
 Sub CenterLocation
@@ -1226,8 +1227,20 @@ EndIf
 EndSub
 
 Sub PreferentialFollow
-  
-  
+If northWall = "True" Then
+  movePossible[1] = "True"
+Else
+  movePossible[1] = "False"
+ElseIf eastWall = "True" Then
+  movePossible[2] = "True"
+Else
+  movePossible[2] = "False"
+ElseIf westWall = "True" Then
+  movePossible[3] = "True"
+Else
+  movePossible[3] = "False"
+EndIf
+
 
 EndSub
 
