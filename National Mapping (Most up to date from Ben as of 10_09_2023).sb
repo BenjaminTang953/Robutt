@@ -947,12 +947,10 @@ EndFor
 For i = 1 To 4
   wallCalcArray[i] = 2 ^ (i - 1)
 EndFor
+
 wallCalcArray[0] = wallCalcArray[0+4]
 wallCalcArray[5] = wallCalcArray[5-4]
 wallCalcArray[6] = wallCalcArray[6-4]
-
-
-
 Sub WallOrientationCalculation
     For i = 1 To 4
       If trueDirection[i] = trueBearing Then
@@ -990,255 +988,244 @@ Sub WallOrientationCalculation
 EndSub
 
 Sub WallCalculation
-currentWallLayout = mapArray[currentY][(currentX * 3) - 1]
-hexValue = currentWallLayout
-HexToDec()
-currentWallLayout = decValue
-wallCount = currentWallLayout
-If currentWallLayout > 0 Then
-  If wallCount - 8 >= 0 Then
-    westWall = "True"
-    wallCount = wallCount - 8
-    If  wallCount - 4 >= 0 Then
-      southWall = "True"
-      wallCount = wallCount - 4
-      If wallCount - 2 >= 0 Then 
-        eastWall = "True"
-        wallCount = wallCount - 2
-        If wallCount - 1 >= 0 Then
-          northWall = "True"
+  currentWallLayout = mapArray[currentY][(currentX * 3) - 1]
+  hexValue = currentWallLayout
+  HexToDec()
+  currentWallLayout = decValue
+  wallCount = currentWallLayout
+  If currentWallLayout > 0 Then
+    If wallCount - 8 >= 0 Then
+      westWall = "True"
+      wallCount = wallCount - 8
+      If  wallCount - 4 >= 0 Then
+        southWall = "True"
+        wallCount = wallCount - 4
+        If wallCount - 2 >= 0 Then 
+          eastWall = "True"
+          wallCount = wallCount - 2
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
         Else
-          northWall = "False"
+          eastWall = "False"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
         EndIf
       Else
-        eastWall = "False"
-        If wallCount - 1 >= 0 Then
-          northWall = "True"
+        southWall = "False"
+        If wallCount - 2 >= 0 Then 
+          eastWall = "True"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
         Else
-          northWall = "False"
-        EndIf
+          eastWall = "False"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
+        EndIf  
       EndIf
     Else
-      southWall = "False"
-      If wallCount - 2 >= 0 Then 
-        eastWall = "True"
-        If wallCount - 1 >= 0 Then
-          northWall = "True"
+      westWall = "False"
+      If wallCount - 4 >= 0 Then
+        southWall = "True"
+        wallCount = wallCount - 4
+        If wallCount - 2 >= 0 Then 
+          eastWall = "True"
+          wallCount = wallCount - 2
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
         Else
-          northWall = "False"
+          eastWall = "False"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
         EndIf
       Else
-        eastWall = "False"
-        If wallCount - 1 >= 0 Then
-          northWall = "True"
+        southWall = "False"
+        If wallCount - 2 >= 0 Then 
+          eastWall = "True"
+          wallCount = wallCount - 2
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
         Else
-          northWall = "False"
+          eastWall = "False"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+            wallCount = "Floating"
+          EndIf
         EndIf
       EndIf  
-    EndIf
+    EndIf 
   Else
+    northWall = "False"
+    eastWall = "False"
+    southWall = "False"
     westWall = "False"
-    If wallCount - 4 >= 0 Then
-      southWall = "True"
-      wallCount = wallCount - 4
-      If wallCount - 2 >= 0 Then 
-        eastWall = "True"
-        wallCount = wallCount - 2
-        If wallCount - 1 >= 0 Then
-          northWall = "True"
-        Else
-          northWall = "False"
-        EndIf
-      Else
-        eastWall = "False"
-        If wallCount - 1 >= 0 Then
-          northWall = "True"
-        Else
-          northWall = "False"
-        EndIf
-      EndIf
-    Else
-      southWall = "False"
-      If wallCount - 2 >= 0 Then 
-        eastWall = "True"
-        wallCount = wallCount - 2
-        If wallCount - 1 >= 0 Then
-          northWall = "True"
-        Else
-          northWall = "False"
-        EndIf
-      Else
-        eastWall = "False"
-        If wallCount - 1 >= 0 Then
-          northWall = "True"
-        Else
-          northWall = "False"
-          wallCount = "Floating"
-        EndIf
-      EndIf
-    EndIf  
-  EndIf 
-Else
-  northWall = "False"
-  eastWall = "False"
-  southWall = "False"
-  westWall = "False"
-EndIf
+  EndIf
 EndSub
 
 Sub CenterLocation
-currentX = centerX
-currentY = centerY
+  currentX = centerX
+  currentY = centerY
 EndSub
 
 Sub VictimMapping
-If victimTrue = "True" Then
-  mapArray[currentY][(currentX * 3) - 1] = 1
-Else
-  mapArray[currentY][(currentX * 3) - 1] = 0
-EndIf
+  If victimTrue = "True" Then
+    mapArray[currentY][(currentX * 3) - 1] = 1
+  Else
+    mapArray[currentY][(currentX * 3) - 1] = 0
+  EndIf
 EndSub
 
 Sub FrequencyCalculation
-hexValue = mapArray[currentY][(currentX * 3)]
-HexToDec()
-If decValue <= 15 Then
-  mapArray[currentY][(currentX * 3)] = mapArray[currentY][(currentX * 3)] + 1
-EndIf
+  hexValue = mapArray[currentY][(currentX * 3)]
+  HexToDec()
+  If decValue <= 15 Then
+    mapArray[currentY][(currentX * 3)] = mapArray[currentY][(currentX * 3)] + 1
+  EndIf
 EndSub
 
 Sub SetStartFrequency
-mapArray[centerY][centerX * 3] = 1
+  mapArray[centerY][centerX * 3] = 1
 EndSub
 
 Sub WallArrayCalculation
-decValue = wallTotal
-DecToHex()
-mapArray[currentY][(currentX * 3) - 2] = hexValue
+  decValue = wallTotal
+  DecToHex()
+  mapArray[currentY][(currentX * 3) - 2] = hexValue
 EndSub
 
 Sub LocationMapping
-For i = 1 To 4
-  If trueDirection[i] = trueBearing Then
-    If i = 1 Then
-    y = currentY + (1 * -negLocation)
-    x = currentX
-    ElseIf i = 2 Then
-    y = currentY
-    x = currentX + (1 * negLocation)
-    ElseIf i = 3 Then
-    y = currentY + (1 * negLocation)
-    x = currentX
-    Else
-    y = currentY
-    x = currentX + (1 * -negLocation) 
-  EndIf
+  For i = 1 To 4
+    If trueDirection[i] = trueBearing Then
+      If i = 1 Then
+      y = currentY + (1 * -negLocation)
+      x = currentX
+      ElseIf i = 2 Then
+      y = currentY
+      x = currentX + (1 * negLocation)
+      ElseIf i = 3 Then
+      y = currentY + (1 * negLocation)
+      x = currentX
+      Else
+      y = currentY
+      x = currentX + (1 * -negLocation) 
+    EndIf
+  EndFor
 EndSub
 
 Sub AdjacentTileFrequencyCalculation
-For i = 1 To 4
-  If trueDirection[i] = trueBearing Then
-    If i = 1 Then 
-    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
-    rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-    leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
-    ElseIf i = 2 Then
-    frontTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-    rightTileFrequency = mapArray[currentY + 1][currentX 3]
-    leftTileFrequency = mapArray[currentY - 1][currentX * 3]
-    ElseIf i = 3 Then
-    frontTileFrequency = mapArray[currentY + 1][currentX * 3]
-    rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
-    leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-    Else
-    frontTileFrequency = mapArray[currentY - 1][currentX * 3]
-    rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
-    leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-  EndIf
-EndFor
-EndSub
-
-Sub PriorityCalculation
-If tileFrequency[1] <> tileFrequency[2] and tileFrequency[2] <> tileFrequency[3] Then 'If they all not equal :D
-  If tileFrequency[1] < tileFrequency[2] < tileFrequency[3] Then 'Front, Right, Left
-    For i = 1 To 3
-      movementPriority[i] = tileFrequency[i]
-    EndFor
-  ElseIf tileFrequency[1] < tileFrequency[3] < tileFrequency[2] Then 'Front, Left, Right
-    movementPriority[1] = tileFrequency[1]
-    movementPriority[2] = tileFrequency[3]
-    movementPriority[3] = tileFrequency[2]
-  ElseIf tileFrequency[2] < tileFrequency[1] < tileFrequency[3] Then 'Right, Front, Left
-    movementPriority[1] = tileFrequency[2]
-    movementPriority[2] = tileFrequency[1]
-    movementPriority[3] = tileFrequency[3]
-  ElseIf tileFrequency[2] < tileFrequency[3] < tileFrequency[1] Then 'Right, Left, Front
-    movementPriority[1] = tileFrequency[2]
-    movementPriority[2] = tileFrequency[3]
-    movementPriority[3] = tileFrequency[1]
-  ElseIf tileFrequency[3] < tileFrequency[1] < tileFrequency[2] Then 'Left, Front, Right
-    movementPriority[1] = tileFrequency[3]
-    movementPriority[2] = tileFrequency[1]
-    movementPriority[3] = tileFrequency[2]
-  ElseIf tileFrequency[3] < tileFrequency[2] < tileFrequency[1] Then 'Left, Right, Front
-    For i = 1 To 3
-      movementPriority[i] = tileFrequency[4 - i]
-    EndFor
-  EndIf
-EndIf
-If tileFrequency[1] = tileFrequency[2] Or tileFrequency[1] = tileFrequency[3] Or tileFrequency[2] = tileFrequency[3] Then 'If some/all are equal <(-_-<))
-  If tileFrequency[1] = tileFrequency[2] and tileFrequency[1] <> tileFrequency[3] Then 'Front and Right are like the same but the Left is different 
-    If tileFrequency[1] < tileFrequency[3] Then
-      movementPriority[1] = tileFrequency[2]
-      movementPriority[2] = tileFrequency[1]
-      movementPriority[3] = tileFrequency[3]
-    Else
-      movementPriority[1] = tileFrequency[3]
-      movementPriority[2] = tileFrequency[2]
-      movementPriority[3] = tileFrequency[1]
+  For i = 1 To 4
+    If trueDirection[i] = trueBearing Then
+      If i = 1 Then 
+      frontTileFrequency = mapArray[currentY - 1][currentX * 3]
+      rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+      leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+      ElseIf i = 2 Then
+      frontTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+      rightTileFrequency = mapArray[currentY + 1][currentX 3]
+      leftTileFrequency = mapArray[currentY - 1][currentX * 3]
+      ElseIf i = 3 Then
+      frontTileFrequency = mapArray[currentY + 1][currentX * 3]
+      rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+      leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+      Else
+      frontTileFrequency = mapArray[currentY - 1][currentX * 3]
+      rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+      leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
     EndIf
-  ElseIf tileFrequency[1] = tileFrequency[3] and tileFrequency[1] <> tileFrequency[2] Then 'Front and Left are like the same but the Right is different  
-    If tileFrequency[1] < tileFrequency[2] Then
+  EndFor
+  EndSub
+
+  Sub PriorityCalculation
+  If tileFrequency[1] <> tileFrequency[2] and tileFrequency[2] <> tileFrequency[3] Then 'If they all not equal :D
+    If tileFrequency[1] < tileFrequency[2] < tileFrequency[3] Then 'Front, Right, Left
+      For i = 1 To 3
+        movementPriority[i] = tileFrequency[i]
+      EndFor
+    ElseIf tileFrequency[1] < tileFrequency[3] < tileFrequency[2] Then 'Front, Left, Right
       movementPriority[1] = tileFrequency[1]
       movementPriority[2] = tileFrequency[3]
       movementPriority[3] = tileFrequency[2]
-    Else
+    ElseIf tileFrequency[2] < tileFrequency[1] < tileFrequency[3] Then 'Right, Front, Left
       movementPriority[1] = tileFrequency[2]
       movementPriority[2] = tileFrequency[1]
       movementPriority[3] = tileFrequency[3]
-    EndIf
-  ElseIf tileFrequency[2] = tileFrequency[3] and tileFrequency[2] <> tileFrequency[1] Then 'Right and Left are like the same but the Front is different  
-    If tileFrequency[2] < tileFrequency[1] Then
+    ElseIf tileFrequency[2] < tileFrequency[3] < tileFrequency[1] Then 'Right, Left, Front
       movementPriority[1] = tileFrequency[2]
       movementPriority[2] = tileFrequency[3]
       movementPriority[3] = tileFrequency[1]
-    Else
-      movementPriority[1] = tileFrequency[1]
-      movementPriority[2] = tileFrequency[2]
-      movementPriority[3] = tileFrequency[3]
+    ElseIf tileFrequency[3] < tileFrequency[1] < tileFrequency[2] Then 'Left, Front, Right
+      movementPriority[1] = tileFrequency[3]
+      movementPriority[2] = tileFrequency[1]
+      movementPriority[3] = tileFrequency[2]
+    ElseIf tileFrequency[3] < tileFrequency[2] < tileFrequency[1] Then 'Left, Right, Front
+      For i = 1 To 3
+        movementPriority[i] = tileFrequency[4 - i]
+      EndFor
     EndIf
   EndIf
-  If tileFrequency[1] = tileFrequency[2] And tileFrequency[2] = tileFrequency[3] Then 'All the same
-    movementPriority[1] = tileFrequency[2]
-    movementPriority[2] = tileFrequency[1]
-    movementPriority[3] = tileFrequency[3]
-  EndIf 
-EndIf
+  If tileFrequency[1] = tileFrequency[2] Or tileFrequency[1] = tileFrequency[3] Or tileFrequency[2] = tileFrequency[3] Then 'If some/all are equal <(-_-<))
+    If tileFrequency[1] = tileFrequency[2] and tileFrequency[1] <> tileFrequency[3] Then 'Front and Right are like the same but the Left is different 
+      If tileFrequency[1] < tileFrequency[3] Then
+        movementPriority[1] = tileFrequency[2]
+        movementPriority[2] = tileFrequency[1]
+        movementPriority[3] = tileFrequency[3]
+      Else
+        movementPriority[1] = tileFrequency[3]
+        movementPriority[2] = tileFrequency[2]
+        movementPriority[3] = tileFrequency[1]
+      EndIf
+    ElseIf tileFrequency[1] = tileFrequency[3] and tileFrequency[1] <> tileFrequency[2] Then 'Front and Left are like the same but the Right is different  
+      If tileFrequency[1] < tileFrequency[2] Then
+        movementPriority[1] = tileFrequency[1]
+        movementPriority[2] = tileFrequency[3]
+        movementPriority[3] = tileFrequency[2]
+      Else
+        movementPriority[1] = tileFrequency[2]
+        movementPriority[2] = tileFrequency[1]
+        movementPriority[3] = tileFrequency[3]
+      EndIf
+    ElseIf tileFrequency[2] = tileFrequency[3] and tileFrequency[2] <> tileFrequency[1] Then 'Right and Left are like the same but the Front is different  
+      If tileFrequency[2] < tileFrequency[1] Then
+        movementPriority[1] = tileFrequency[2]
+        movementPriority[2] = tileFrequency[3]
+        movementPriority[3] = tileFrequency[1]
+      Else
+        movementPriority[1] = tileFrequency[1]
+        movementPriority[2] = tileFrequency[2]
+        movementPriority[3] = tileFrequency[3]
+      EndIf
+    EndIf
+    If tileFrequency[1] = tileFrequency[2] And tileFrequency[2] = tileFrequency[3] Then 'All the same
+      movementPriority[1] = tileFrequency[2]
+      movementPriority[2] = tileFrequency[1]
+      movementPriority[3] = tileFrequency[3]
+    EndIf 
+  EndIf
 EndSub
 
 Sub PreferentialFollow
-If northWall = "True" Then
-  movePossible[1] = "True"
-Else
-  movePossible[1] = "False"
-ElseIf eastWall = "True" Then
-  movePossible[2] = "True"
-Else
-  movePossible[2] = "False"
-ElseIf westWall = "True" Then
-  movePossible[3] = "True"
-Else
-  movePossible[3] = "False"
 EndIf
 
 
@@ -1246,27 +1233,27 @@ EndSub
 
 'Math Calculation Subs
 Sub DecToHex
-decValue = Math.Remainder(decValue, 16)
-hexValue = Text.GetSubText(hexString, decValue + 1, 1)
+  decValue = Math.Remainder(decValue, 16)
+  hexValue = Text.GetSubText(hexString, decValue + 1, 1)
 EndSub
 
 Sub HexToDec
-If hexValue > 9 Then
-  ElseIf hexValue = "A" Then
-    hexValue = 11
-  ElseIf hexValue = "B" Then
-    hexValue = 12
-  ElseIf hexValue = "C" Then
-    hexValue = 13
-  ElseIf hexValue = "D" Then
-    hexValue = 14
-  ElseIf hexValue = "E" Then
-    hexValue = 15
-  ElseIf hexValue = "F" Then
-    hexValue = 16
-EndIf
-hexValue = Math.Remainder(hexValue, 10)
-decValue = Text.GetSubText(decString, hexValue + 1,)
+  If hexValue > 9 Then
+    ElseIf hexValue = "A" Then
+      hexValue = 11
+    ElseIf hexValue = "B" Then
+      hexValue = 12
+    ElseIf hexValue = "C" Then
+      hexValue = 13
+    ElseIf hexValue = "D" Then
+      hexValue = 14
+    ElseIf hexValue = "E" Then
+      hexValue = 15
+    ElseIf hexValue = "F" Then
+      hexValue = 16
+  EndIf
+  hexValue = Math.Remainder(hexValue, 10)
+  decValue = Text.GetSubText(decString, hexValue + 1,)
 EndSub
 
 
