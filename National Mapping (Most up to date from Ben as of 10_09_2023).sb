@@ -1222,7 +1222,7 @@ If tileFrequency[1] = tileFrequency[2] Or tileFrequency[1] = tileFrequency[3] Or
     movementPriority[1] = tileFrequency[2]
     movementPriority[2] = tileFrequency[1]
     movementPriority[3] = tileFrequency[3]
-  EndIf
+  EndIf 
 EndIf
 EndSub
 
