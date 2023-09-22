@@ -1,0 +1,39 @@
+'Thomas Code Starts Here
+Sub PreferentialFollow
+    '1 = Front, 2 = Right, 3 = Left
+    'movePossible [null, T/F, T/F, T/F] (order of F, R, L)
+    'priorityTH [Highest Priority -> Lowest]
+    i = 1
+    leaveTH = "False"
+    While leaveTH = "False" or i > 3 'this will repeat until we move somewhere
+        'This is how you do case statments: 'https://smallbasic.github.io/reference/640.html
+        
+        'check which direction has frequency
+        if movementPriority[i] = frontTileFrequency Then
+            'if we can move this direction
+            if movePossible[1] = "True" Then
+                'go this direction then stop checking for priorites
+                FrontMove()
+                leaveTH = "True"
+            EndIf
+
+        ElseIf movementPriority[i] = rightTileFrequency Then
+            if movePossible[2] = "True" Then
+                RightMove()
+                leaveTH = "True"
+            EndIf
+
+        ElseIf movementPriority[i] = leftTileFrequency Then
+            if movePossible[3] = "True" Then
+                LeftMove()
+                leaveTH = "True"
+            EndIF
+
+        Else
+           'Error code here "GET FUCKED - Ben"
+
+        EndIf
+      i = i + 1
+    EndWhile
+EndSub
+'Thomas Code Ends Here
