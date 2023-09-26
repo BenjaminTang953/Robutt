@@ -67,8 +67,10 @@ trueDirection[1] = "North"
 trueDirection[2] = "East"
 trueDirection[3] = "South"
 trueDirection[4] = "West"
-centerX = 13
-centerY = 13
+maxX = 25
+maxY = 25
+centerX = Math.Ceiling(maxX / 2)
+centerY = Math.Ceiling(maxY / 2)
 changeWallCalc[1] = 0
 changeWallCalc[2] = 1
 changeWallCalc[3] = 2
@@ -83,10 +85,6 @@ decValue = 0
 currentX = 0
 currentY = 0
 negLocation = 1
-north1Tile = mapArray[currentY - 1][currentX]
-east1Tile = mapArray[currentY][currentX + 1]
-south1Tile = mapArray[currentY + 1][currentX]
-west1Tile = mapArray[currentY][currentX - 1]
 minimumFrequency = 0
 movementPriority[1] = "Front"
 movementPriority[2] = "Right"
@@ -97,6 +95,12 @@ tileFrequency[3] = leftTileFrequency
 movePossible[1] = "" 'Front move possible
 movePossible[2] = "" 'Right move possible
 movePossible[3] = "" 'Left move possible
+preArray = ""
+change = ""
+sufArray = ""
+mode = ""
+hexAppendRequired = ""
+
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 ' I2C  INIT
@@ -194,14 +198,14 @@ read=Sensor.ReadRaw(4,3)
 
 
 For i = 0 to 2
-  blackRead[i] = whiteRead[i]/8
+    blackRead[i] = whiteRead[i]/8
 EndFor 
 
 'Init
 For i = 0 to 2
-  maxRead[i] = whiteRead[i]
-  colFactor[i] = maxRead[i]/blackRead[i]/2
-  minRead[i] = maxRead[i]/colFactor[i]
+    maxRead[i] = whiteRead[i]
+    colFactor[i] = maxRead[i]/blackRead[i]/2
+    minRead[i] = maxRead[i]/colFactor[i]
 EndFor
 
 
@@ -211,61 +215,61 @@ EndFor
 
 'WALL LOGIC
 Sub lWall1Check 'Checking For Left Wall
-    If maxDist1 > lDist Then 'If The Dist To Left Wall Is Less Than The Extreme In 1 Tile
-        lWall1 = "True" 'Then There Is Wall
-    Else 'If Not
-        lWall1 = "False" 'Then There Is No Wall
-    EndIf
+If maxDist1 > lDist Then 'If The Dist To Left Wall Is Less Than The Extreme In 1 Tile
+    lWall1 = "True" 'Then There Is Wall
+Else 'If Not
+    lWall1 = "False" 'Then There Is No Wall
+EndIf
 EndSub
 
 
 Sub rWall1Check 'Same as left wall but for right wall
-    If maxDist1 > rDist Then
-        rWall1 = "True"
-    Else
-        rWall1 = "False"
-    EndIf  
+If maxDist1 > rDist Then
+    rWall1 = "True"
+Else
+    rWall1 = "False"
+EndIf  
 EndSub 
 
 Sub fWall1Check 'Once again but for front wall
-    If maxDist1 > fDist Then
-        fWall1 = "True"
-    Else
-        fWall1 = "False"
-    EndIf  
+If maxDist1 > fDist Then
+    fWall1 = "True"
+Else
+    fWall1 = "False"
+EndIf  
 EndSub
 
 'VICTIM LOGIC
 Sub VictimCheck 'Can the camera see a victim either dead or alive
-    If isVictim = "True" Then 'If it can
-        Speaker.Note(50,"C4",500) 'Acknowledge the victim
-        Program.Delay(500)
-        VictimOperation() 'Drop pellet thing
-        victimTrue = "True"
-    EndIf
+If isVictim = "True" Then 'If it can
+    Speaker.Note(50,"C4",500) 'Acknowledge the victim
+    Program.Delay(500)
+    VictimOperation() 'Drop pellet thing
+    victimTrue = "True"
+EndIf
 EndSub
 
 Sub VictimOperation 'Dropping the pellet
-    If mapArray[currentY][(currentX * 3) - 1] <> 1
-      If ((averageDirectTemp + 2.5) <= leftDirectTemp) Then 'If any of the 3 sides has an alive victim within a range of the average temp
-          If pelletCounter > 0 Then
-              DropperMove() 'Move the dropper
-              pelletCounter = pelletCounter - 1 'Change the Counter
-          EndIf
-      ElseIf ((averageDirectTemp + 2.5) <= rightDirectTemp) then
-          If pelletCounter > 0 Then
-              DropperMove() 'Move the dropper
-              pelletCounter = pelletCounter - 1 'Change the Counter
-          EndIf
-      elseif ((averageDirectTemp + 2.5) <= frontDirectTemp) then
-          If pelletCounter > 0 Then
-              DropperMove() 'Move the dropper
-              pelletCounter = pelletCounter - 1 'Change the Counter
-          EndIf  
-      Else
-          Speaker.Note(50,"A4",500) 'Acknowledge dead x x victim
-      EndIf
+If mapArray[currentY][(currentX * 3) - 1] <> 1 Then
+    If ((averageDirectTemp + 2.5) <= leftDirectTemp) Then 'If any of the 3 sides has an alive victim within a range of the average temp
+        If pelletCounter > 0 Then
+            DropperMove() 'Move the dropper
+            pelletCounter = pelletCounter - 1 'Change the Counter
+        EndIf
+    ElseIf ((averageDirectTemp + 2.5) <= rightDirectTemp) then
+        If pelletCounter > 0 Then
+            DropperMove() 'Move the dropper
+            pelletCounter = pelletCounter - 1 'Change the Counter
+        EndIf
+    ElseIf ((averageDirectTemp + 2.5) <= frontDirectTemp) then
+        If pelletCounter > 0 Then
+            DropperMove() 'Move the dropper
+            pelletCounter = pelletCounter - 1 'Change the Counter
+        EndIf  
+    Else
+        Speaker.Note(50,"A4",500) 'Acknowledge dead x x victim
     EndIf
+EndIf
 EndSub
 
 Sub DropperMove 'Move the dropper thing
@@ -940,12 +944,22 @@ Sub LeftWallFollow
 EndSub  
 
 'Mapping Subs and Arrays thingys :D
-For i = 1 To 25
-  mapArray[i] = "000" * 25
+For i = 1 To maxY
+  For x = 1 To maxX
+    mapArray[i] = Text.Append(mapArray[i] , "000")
+  EndFor
 EndFor
 
+Sub ArrayChange  'Mode = Wall/Victim/Frequency, Frequency = 0, Victim = 1, Wall = 2
+calcX = (currentX * 3) - mode
+preArray = Text.GetSubText(mapArray[currentY], 1, calcX - 1)
+sufArray = Text.GetSubText(mapArray[currentY], calcX, 75 - calcX)
+Text.GetSubText(mapArray[currentY], calcX, 75 - calcX)
+mapArray[currentY] = Text.Append(Text.Append(preArray, change) , sufArray)
+EndSub
+
 For i = 1 To 4
-  wallCalcArray[i] = 2 ^ (i - 1)
+  wallCalcArray[i] = Math.Power((i - 1), 2)
 EndFor
 
 wallCalcArray[0] = wallCalcArray[0+4]
@@ -983,12 +997,13 @@ Sub WallOrientationCalculation
             wallTotal = wallCalcArray[2 + differenceWallCalc]
           Else
             wallTotal = 0
+          EndIf
         EndIf
-      EndIf
+       EndIf
 EndSub
 
 Sub WallCalculation
-  currentWallLayout = mapArray[currentY][(currentX * 3) - 1]
+  currentWallLayout = Text.GetSubText(mapArray[currentY], currentX * 3  - 2 , 1)
   hexValue = currentWallLayout
   HexToDec()
   currentWallLayout = decValue
@@ -1091,33 +1106,47 @@ EndSub
 
 Sub VictimMapping
   If victimTrue = "True" Then
-    mapArray[currentY][(currentX * 3) - 1] = 1
+    mode = 1
+    change = 1
+    ArrayChange()
   Else
-    mapArray[currentY][(currentX * 3) - 1] = 0
+    mode = 1
+    change = 0
+    ArrayChange()
   EndIf
 EndSub
 
 Sub FrequencyCalculation
-  hexValue = mapArray[currentY][(currentX * 3)]
+  hexValue = Text.GetSubText(mapArray[currentY], currentX  * 3, 1)
   HexToDec()
   If decValue <= 15 Then
-    mapArray[currentY][(currentX * 3)] = mapArray[currentY][(currentX * 3)] + 1
+    mode = 0
+    change = Text.GetSubText(mapArray[currentY] , currentX  * 3, 1)  + 1
+    ArrayChange()
   EndIf
 EndSub
 
 Sub SetStartFrequency
-  mapArray[centerY][centerX * 3] = 1
+mode = 0
+change = 1
+calcX = (centerX * 3) - mode
+preArray = Text.GetSubText(mapArray[centerY], 1, calcX - 1)
+sufArray = Text.GetSubText(mapArray[centerY], calcX, 75 - calcX)
+Text.GetSubText(mapArray[centerY], calcX, 75 - calcX)
+mapArray[centerY] = Text.Append(Text.Append(preArray, change) , sufArray)
 EndSub
 
 Sub WallArrayCalculation
-  decValue = wallTotal
-  DecToHex()
-  mapArray[currentY][(currentX * 3) - 2] = hexValue
+decValue = wallTotal
+DecToHex()
+change = hexValue
+mode = 2
+ArrayChange()
 EndSub
 
 Sub LocationMapping
-  For i = 1 To 4
-    If trueDirection[i] = trueBearing Then
+For i = 1 To 4
+   If trueDirection[i] = trueBearing Then
       If i = 1 Then
       y = currentY + (1 * -negLocation)
       x = currentX
@@ -1131,51 +1160,53 @@ Sub LocationMapping
       y = currentY
       x = currentX + (1 * -negLocation) 
     EndIf
-  EndFor
+  EndIf
+EndFor
 EndSub
 
 Sub AdjacentTileFrequencyCalculation
   For i = 1 To 4
     If trueDirection[i] = trueBearing Then
       If i = 1 Then 
-      frontTileFrequency = mapArray[currentY - 1][currentX * 3]
-      rightTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-      leftTileFrequency = mapArray[currentY][(currentX - 1) * 3]
+      frontTileFrequency = Text.GetSubText(mapArray[currentY - 1], (currentX * 3) - 2, 1)
+      rightTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX + 1) * 3) - 2, 1)
+      leftTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX - 1) * 3) - 2, 1)
       ElseIf i = 2 Then
-      frontTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-      rightTileFrequency = mapArray[currentY + 1][currentX 3]
-      leftTileFrequency = mapArray[currentY - 1][currentX * 3]
+      frontTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX + 1) * 3) - 2, 1)
+      rightTileFrequency = Text.GetSubText(mapArray[currentY + 1], (currentX  * 3) - 2, 1)
+      leftTileFrequency = Text.GetSubText(mapArray[currentY - 1], (currentX  * 3) - 2, 1)
       ElseIf i = 3 Then
-      frontTileFrequency = mapArray[currentY + 1][currentX * 3]
-      rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
-      leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
+      frontTileFrequency = Text.GetSubText(mapArray[currentY + 1], (currentX  * 3) - 2, 1)
+      rightTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX - 1) * 3) - 2, 1)
+      leftTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX + 1) * 3) - 2, 1)
       Else
-      frontTileFrequency = mapArray[currentY - 1][currentX * 3]
-      rightTileFrequency = mapArray[currentY][(currentX - 1) * 3]
-      leftTileFrequency = mapArray[currentY][(currentX + 1) * 3]
-    EndIf
+      frontTileFrequency = Text.GetSubText(mapArray[currentY - 1], (currentX  * 3) - 2, 1)
+      rightTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX - 1) * 3) - 2, 1)
+      leftTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX + 1) * 3) - 2, 1)
+      EndIf
+     EndIf
   EndFor
   EndSub
 
-  Sub PriorityCalculation
+Sub PriorityCalculation
   If tileFrequency[1] <> tileFrequency[2] and tileFrequency[2] <> tileFrequency[3] Then 'If they all not equal :D
-    If tileFrequency[1] < tileFrequency[2] < tileFrequency[3] Then 'Front, Right, Left
+    If tileFrequency[1] < tileFrequency[2] and tileFrequency[2] < tileFrequency[3] Then 'Front, Right, Left
       For i = 1 To 3
         movementPriority[i] = tileFrequency[i]
       EndFor
-    ElseIf tileFrequency[1] < tileFrequency[3] < tileFrequency[2] Then 'Front, Left, Right
+    ElseIf tileFrequency[1] < tileFrequency[3] and tileFrequency[3] < tileFrequency[2] Then 'Front, Left, Right
       movementPriority[1] = tileFrequency[1]
       movementPriority[2] = tileFrequency[3]
       movementPriority[3] = tileFrequency[2]
-    ElseIf tileFrequency[2] < tileFrequency[1] < tileFrequency[3] Then 'Right, Front, Left
+    ElseIf tileFrequency[2] < tileFrequency[1] and tileFrequency[1] < tileFrequency[3] Then 'Right, Front, Left
       movementPriority[1] = tileFrequency[2]
       movementPriority[2] = tileFrequency[1]
       movementPriority[3] = tileFrequency[3]
-    ElseIf tileFrequency[2] < tileFrequency[3] < tileFrequency[1] Then 'Right, Left, Front
+    ElseIf tileFrequency[2] < tileFrequency[3] and tileFrequency[3] < tileFrequency[1] Then 'Right, Left, Front
       movementPriority[1] = tileFrequency[2]
       movementPriority[2] = tileFrequency[3]
       movementPriority[3] = tileFrequency[1]
-    ElseIf tileFrequency[3] < tileFrequency[1] < tileFrequency[2] Then 'Left, Front, Right
+    ElseIf tileFrequency[3] < tileFrequency[1] and tileFrequency[1] < tileFrequency[2] Then 'Left, Front, Right
       movementPriority[1] = tileFrequency[3]
       movementPriority[2] = tileFrequency[1]
       movementPriority[3] = tileFrequency[2]
@@ -1225,11 +1256,47 @@ Sub AdjacentTileFrequencyCalculation
   EndIf
 EndSub
 
+
+'Thomas Code Starts Here
 Sub PreferentialFollow
-EndIf
+    '1 = Front, 2 = Right, 3 = Left
+    'movePossible [null, T/F, T/F, T/F] (order of F, R, L)
+    'priorityTH [Highest Priority -> Lowest]
+    i = 1
+    leaveTH = "False"
+    While leaveTH = "False" or i > 3 'this will repeat until we move somewhere
+        'This is how you do case statments: 'https://smallbasic.github.io/reference/640.html
+        
+        'check which direction has frequency
+        if movementPriority[i] = frontTileFrequency Then
+            'if we can move this direction
+            if movePossible[1] = "True" Then
+                'go this direction then stop checking for priorites
+                FrontMove()
+                leaveTH = "True"
+            EndIf
 
+        ElseIf movementPriority[i] = rightTileFrequency Then
+            if movePossible[2] = "True" Then
+                RightMove()
+                leaveTH = "True"
+            EndIf
 
+        ElseIf movementPriority[i] = leftTileFrequency Then
+            if movePossible[3] = "True" Then
+                LeftMove()
+                leaveTH = "True"
+            EndIF
+
+        Else
+           'Error code here "GET FUCKED - Ben"
+
+        EndIf
+      i = i + 1
+    EndWhile
 EndSub
+'Thomas Code Ends Here
+
 
 'Math Calculation Subs
 Sub DecToHex
@@ -1238,22 +1305,30 @@ Sub DecToHex
 EndSub
 
 Sub HexToDec
-  If hexValue > 9 Then
-    ElseIf hexValue = "A" Then
-      hexValue = 11
-    ElseIf hexValue = "B" Then
-      hexValue = 12
-    ElseIf hexValue = "C" Then
-      hexValue = 13
-    ElseIf hexValue = "D" Then
-      hexValue = 14
-    ElseIf hexValue = "E" Then
-      hexValue = 15
-    ElseIf hexValue = "F" Then
-      hexValue = 16
-  EndIf
-  hexValue = Math.Remainder(hexValue, 10)
-  decValue = Text.GetSubText(decString, hexValue + 1,)
+If hexValue = "A" Then
+  hexValue = 10
+  hexAppendRequired = "True"
+ElseIf hexValue = "B" Then
+  hexValue = 11
+  hexAppendRequired = "True"
+ElseIf hexValue = "C" Then
+  hexValue = 12
+  hexAppendRequired = "True"
+ElseIf hexValue = "D" Then
+  hexValue = 13
+  hexAppendRequired = "True"
+ElseIf hexValue = "E" Then
+  hexValue = 14
+  hexAppendRequired = "True"
+ElseIf hexValue = "F" Then
+  hexValue = 15
+  hexAppendRequired = "True"
+EndIf
+hexValue = Math.Remainder(hexValue, 10)
+decValue = Text.GetSubText(decString, hexValue + 1, 1 )
+If hexAppendRequired = "True" Then
+  decValue = Text.Append("1" , decValue)
+EndIf
 EndSub
 
 
@@ -1292,7 +1367,7 @@ While Done = "False"
         rightFollow = "True"
       EndIf
     Else
-      running = "True"
+        running = "True"
     EndIf
   EndIf  
 EndWhile
