@@ -1191,67 +1191,67 @@ Sub AdjacentTileFrequencyCalculation
 Sub PriorityCalculation
   If tileFrequency[1] <> tileFrequency[2] and tileFrequency[2] <> tileFrequency[3] Then 'If they all not equal :D
     If tileFrequency[1] < tileFrequency[2] and tileFrequency[2] < tileFrequency[3] Then 'Front, Right, Left
-      For i = 1 To 3
-        movementPriority[i] = tileFrequency[i]
-      EndFor
+      movementPriority[1] = "Front"
+      movementPriority[2] = "Right"
+      movementPriority[3] = "Left"
     ElseIf tileFrequency[1] < tileFrequency[3] and tileFrequency[3] < tileFrequency[2] Then 'Front, Left, Right
-      movementPriority[1] = tileFrequency[1]
-      movementPriority[2] = tileFrequency[3]
-      movementPriority[3] = tileFrequency[2]
+      movementPriority[1] = "Front"
+      movementPriority[2] = "Left"
+      movementPriority[3] = "Right"
     ElseIf tileFrequency[2] < tileFrequency[1] and tileFrequency[1] < tileFrequency[3] Then 'Right, Front, Left
-      movementPriority[1] = tileFrequency[2]
-      movementPriority[2] = tileFrequency[1]
-      movementPriority[3] = tileFrequency[3]
+      movementPriority[1] = "Right"
+      movementPriority[2] = "Front"
+      movementPriority[3] = "Left"
     ElseIf tileFrequency[2] < tileFrequency[3] and tileFrequency[3] < tileFrequency[1] Then 'Right, Left, Front
-      movementPriority[1] = tileFrequency[2]
-      movementPriority[2] = tileFrequency[3]
-      movementPriority[3] = tileFrequency[1]
+      movementPriority[1] = "Right"
+      movementPriority[2] = "Left"
+      movementPriority[3] = "Front"
     ElseIf tileFrequency[3] < tileFrequency[1] and tileFrequency[1] < tileFrequency[2] Then 'Left, Front, Right
-      movementPriority[1] = tileFrequency[3]
-      movementPriority[2] = tileFrequency[1]
-      movementPriority[3] = tileFrequency[2]
+      movementPriority[1] = "Left"
+      movementPriority[2] = "Front"
+      movementPriority[3] = "Right"
     ElseIf tileFrequency[3] < tileFrequency[2] < tileFrequency[1] Then 'Left, Right, Front
-      For i = 1 To 3
-        movementPriority[i] = tileFrequency[4 - i]
-      EndFor
+      movementPriority[1] = "Left"
+      movementPriority[2] = "Right"
+      movementPriority[3] = "Front"
     EndIf
   EndIf
   If tileFrequency[1] = tileFrequency[2] Or tileFrequency[1] = tileFrequency[3] Or tileFrequency[2] = tileFrequency[3] Then 'If some/all are equal <(-_-<))
     If tileFrequency[1] = tileFrequency[2] and tileFrequency[1] <> tileFrequency[3] Then 'Front and Right are like the same but the Left is different 
       If tileFrequency[1] < tileFrequency[3] Then
-        movementPriority[1] = tileFrequency[2]
-        movementPriority[2] = tileFrequency[1]
-        movementPriority[3] = tileFrequency[3]
+        movementPriority[1] = "Right"
+        movementPriority[2] = "Front"
+        movementPriority[3] = "Left"
       Else
-        movementPriority[1] = tileFrequency[3]
-        movementPriority[2] = tileFrequency[2]
-        movementPriority[3] = tileFrequency[1]
+        movementPriority[1] = "Left"
+        movementPriority[2] = "Right"
+        movementPriority[3] = "Front"
       EndIf
     ElseIf tileFrequency[1] = tileFrequency[3] and tileFrequency[1] <> tileFrequency[2] Then 'Front and Left are like the same but the Right is different  
       If tileFrequency[1] < tileFrequency[2] Then
-        movementPriority[1] = tileFrequency[1]
-        movementPriority[2] = tileFrequency[3]
-        movementPriority[3] = tileFrequency[2]
+        movementPriority[1] = "Front"
+        movementPriority[2] = "Left"
+        movementPriority[3] = "Right"
       Else
-        movementPriority[1] = tileFrequency[2]
-        movementPriority[2] = tileFrequency[1]
-        movementPriority[3] = tileFrequency[3]
+        movementPriority[1] = "Right"
+        movementPriority[2] = "Front"
+        movementPriority[3] = "Left"
       EndIf
     ElseIf tileFrequency[2] = tileFrequency[3] and tileFrequency[2] <> tileFrequency[1] Then 'Right and Left are like the same but the Front is different  
       If tileFrequency[2] < tileFrequency[1] Then
-        movementPriority[1] = tileFrequency[2]
-        movementPriority[2] = tileFrequency[3]
-        movementPriority[3] = tileFrequency[1]
+        movementPriority[1] = "Right"
+        movementPriority[2] = "Left"
+        movementPriority[3] = "Front"
       Else
-        movementPriority[1] = tileFrequency[1]
-        movementPriority[2] = tileFrequency[2]
-        movementPriority[3] = tileFrequency[3]
+        movementPriority[1] = "Front"
+        movementPriority[2] = "Right"
+        movementPriority[3] = "Left"
       EndIf
     EndIf
     If tileFrequency[1] = tileFrequency[2] And tileFrequency[2] = tileFrequency[3] Then 'All the same
-      movementPriority[1] = tileFrequency[2]
-      movementPriority[2] = tileFrequency[1]
-      movementPriority[3] = tileFrequency[3]
+      movementPriority[1] = "Right"
+      movementPriority[2] = "Front"
+      movementPriority[3] = "Left"
     EndIf 
   EndIf
 EndSub
@@ -1264,34 +1264,30 @@ Sub PreferentialFollow
     'priorityTH [Highest Priority -> Lowest]
     i = 1
     leaveTH = "False"
-    While leaveTH = "False" or i > 3 'this will repeat until we move somewhere
+    While leaveTH = "False" or i > 4 'this will repeat until we move somewhere
         'This is how you do case statments: 'https://smallbasic.github.io/reference/640.html
-        
         'check which direction has frequency
-        if movementPriority[i] = frontTileFrequency Then
-            'if we can move this direction
-            if movePossible[1] = "True" Then
-                'go this direction then stop checking for priorites
-                FrontMove()
-                leaveTH = "True"
-            EndIf
+      if movementPriority[i] = "Front" Then
+        'if we can move this direction
+        if movePossible[1] = "True" Then
+          'go this direction then stop checking for priorites
+          FrontMove()
+          leaveTH = "True"
+        endIf
 
-        ElseIf movementPriority[i] = rightTileFrequency Then
-            if movePossible[2] = "True" Then
-                RightMove()
-                leaveTH = "True"
-            EndIf
-
-        ElseIf movementPriority[i] = leftTileFrequency Then
-            if movePossible[3] = "True" Then
-                LeftMove()
-                leaveTH = "True"
-            EndIF
-
-        Else
-           'Error code here "GET FUCKED - Ben"
-
+      ElseIf movementPriority[i] = "Right" Then
+        if movePossible[2] = "True" Then
+          RightMove()
+          leaveTH = "True"
         EndIf
+      ElseIf movementPriority[i] = "Left" Then
+        if movePossible[3] = "True" Then
+          LeftMove()
+          leaveTH = "True"
+        EndIF
+      Else
+        BackMove()
+      EndIf
       i = i + 1
     EndWhile
 EndSub
