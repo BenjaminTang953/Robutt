@@ -75,9 +75,10 @@ changeWallCalc[1] = 0
 changeWallCalc[2] = 1
 changeWallCalc[3] = 2
 changeWallCalc[4] = -1
-valueWallCalcArray[1] = 1
-valueWallCalcArray[2] = 2
-valueWallCalcArray[4] = 4
+changePossibilityCalc[1] = 0
+changePossibilityCalc[2] = 1
+changePossibilityCalc[3] = 2
+changePossibilityCalc[4] = -1
 differenceWallCalc = 0
 hexString = "0123456789ABCDEF"
 decString = "0123456789"
@@ -1255,10 +1256,48 @@ Sub PriorityCalculation
   EndIf
 EndSub
 
+
 Sub MovementPossibility
 WallCalculation()
-
-
+fWall1 = "False"
+rWall1 = "False"
+lWall1 = "False"
+If trueBearing = "North" Then
+  If northWall = "True" Then
+    fWall1 = "True"
+  ElseIf eastWall = "True" Then
+    rWall1 = "True"
+  ElseIf westWall = "True" Then
+    lWall1 = "True"
+  EndIf
+EndIf
+If trueBearing = "East" Then
+  If northWall = "True" Then
+    lWall1 = "True"
+  ElseIf eastWall = "True" Then
+    fWall1 = "True"
+  ElseIf southWall = "True" Then
+    rWall1 = "True"
+  EndIf
+EndIf
+If trueBearing = "South" Then
+  If southWall = "True" Then
+    fWall1 = "True"
+  ElseIf eastWall = "True" Then
+    lWall1 = "True"
+  ElseIf westWall = "True" Then
+    rWall1 = "True"
+  EndIf
+EndIf
+If trueBearing = "West" Then
+  If northWall = "True" Then
+    rWall1 = "True"
+  ElseIf westWall = "True" Then
+    fWall1 = "True"
+  ElseIf southWall = "True" Then
+    lWall1 = "True"
+  EndIf
+EndIf
 EndSub
 
 
