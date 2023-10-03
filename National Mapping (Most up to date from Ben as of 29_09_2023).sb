@@ -1255,6 +1255,12 @@ Sub PriorityCalculation
   EndIf
 EndSub
 
+Sub MovementPossibility
+WallCalculation()
+
+
+EndSub
+
 
 'Thomas Code Starts Here
 Sub PreferentialFollow

@@ -943,6 +943,7 @@ Sub LeftWallFollow
     EndIf
 EndSub  
 
+
 'Mapping Subs and Arrays thingys :D
 For i = 1 To maxY
   For x = 1 To maxX
@@ -953,13 +954,12 @@ EndFor
 Sub ArrayChange  'Mode = Wall/Victim/Frequency, Frequency = 0, Victim = 1, Wall = 2
 calcX = (currentX * 3) - mode
 preArray = Text.GetSubText(mapArray[currentY], 1, calcX - 1)
-sufArray = Text.GetSubText(mapArray[currentY], calcX, 75 - calcX)
-Text.GetSubText(mapArray[currentY], calcX, 75 - calcX)
+sufArray = Text.GetSubText(mapArray[currentY], calcX + 1, 75 - calcX)
 mapArray[currentY] = Text.Append(Text.Append(preArray, change) , sufArray)
 EndSub
 
 For i = 1 To 4
-  wallCalcArray[i] = Math.Power((i - 1), 2)
+  wallCalcArray[i] = Math.Power(2, (i-1))
 EndFor
 
 wallCalcArray[0] = wallCalcArray[0+4]
@@ -1128,11 +1128,10 @@ EndSub
 
 Sub SetStartFrequency
 mode = 0
-change = 1
+change = "1"
 calcX = (centerX * 3) - mode
 preArray = Text.GetSubText(mapArray[centerY], 1, calcX - 1)
-sufArray = Text.GetSubText(mapArray[centerY], calcX, 75 - calcX)
-Text.GetSubText(mapArray[centerY], calcX, 75 - calcX)
+sufArray = Text.GetSubText(mapArray[centerY], calcX + 1, 75 - calcX)
 mapArray[centerY] = Text.Append(Text.Append(preArray, change) , sufArray)
 EndSub
 
