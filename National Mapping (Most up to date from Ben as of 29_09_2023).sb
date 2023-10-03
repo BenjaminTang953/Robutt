@@ -943,7 +943,8 @@ Sub LeftWallFollow
     EndIf
 EndSub  
 
-Mapping Subs and Arrays thingys :D
+
+'Mapping Subs and Arrays thingys :D
 For i = 1 To maxY
   For x = 1 To maxX
     mapArray[i] = Text.Append(mapArray[i] , "000")
@@ -1324,7 +1325,6 @@ If hexAppendRequired = "True" Then
   decValue = Text.Append("1" , decValue)
 EndIf
 EndSub
-
 
 
 
