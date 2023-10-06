@@ -32,7 +32,7 @@ Sub BearingAdjust
     trueBearing = "North"
   ElseIf bearing = 2 Then
     trueBearing = "East"
-  elseif bearing = 3 then
+  ElseIf bearing = 3 then
     trueBearing = "South"
   Else 
     trueBearing = "West"

@@ -339,6 +339,8 @@ Sub FrontMove
   EndWhile
   
   If blackTile = "True" Then
+    turn = "Back"
+    BearingAdjust()
     neg = -1
     MotorMoveSync()
     While motor.GetCount("A") > 0
@@ -352,7 +354,6 @@ Sub FrontMove
     negLocation = 1
     LocationMapping()
   EndIf
-
   FourMotorsBreak()
 EndSub  
 
@@ -383,6 +384,8 @@ Sub RightMove
   Program.Delay(148)
   M1Stop()
   baseSpeed = moveSpeed
+  turn = "Right"
+  BearingAdjust()
   FrontMove()
 EndSub
 
@@ -445,6 +448,8 @@ Sub LeftMove
   M1Stop()
   
   baseSpeed = moveSpeed
+  turn = "Left"
+  BearingAdjust()
   FrontMove()
 EndSub
 
@@ -500,6 +505,8 @@ Sub BackMove
   M1Stop()
   
   baseSpeed = moveSpeed
+  turn = "Back"
+  BearingAdjust()
   FrontMove()
 EndSub
 
@@ -801,6 +808,8 @@ Sub SensorGathering 'Gather 3 sets of data
   Else
     isVictim = "False"
   EndIf
+  WallArrayCalculation()
+
 EndSub
 
 'SENSOR SUBS
@@ -1338,6 +1347,45 @@ Sub PreferentialFollow
 EndSub
 'Thomas Code Ends Here
 
+Sub BearingAdjust
+  
+  'convert trueBearing to number
+  If trueBearing = "North" Then
+    bearing = 1
+  ElseIf trueBearing = "East" then
+    bearing = 2
+  elseif trueBearing = "South" then
+    bearing = 3
+  Else
+    bearing = 4
+  EndIf
+  
+  
+  If Turn = "Right" Then 'if turning right
+    bearing = bearing + 1
+  ElseIf Turn = "Back" Then ' of turning back
+    bearing = bearing + 2
+  ElseIf 'If turning left reduce by one
+    bearing = bearing - 1
+  EndIf
+  
+  If bearing < 1 Then
+    bearing = bearing + 4
+  ElseIf bearing > 4 then
+    bearing = bearing -4
+  EndIf
+  
+  If bearing = 1 Then
+    trueBearing = "North"
+  ElseIf bearing = 2 Then
+    trueBearing = "East"
+  ElseIf bearing = 3 then
+    trueBearing = "South"
+  Else 
+    trueBearing = "West"
+  EndIf
+EndSub
+
 
 'Math Calculation Subs
 Sub DecToHex
@@ -1379,12 +1427,14 @@ EndSub
 'MAIN CODE
 running = "True"
 rightFollow = "False"
+trueBearing = "North"
 
 While Done = "False"
   CenterLocation()
   SetStartFrequency()
   If running = "True" then
     SensorGathering()
+    WallArrayCalculation()
     colorRead()
     Motor.ResetCount("A")
     MotorMoveSync()
