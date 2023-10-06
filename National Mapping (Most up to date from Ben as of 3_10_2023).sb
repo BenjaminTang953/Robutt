@@ -348,7 +348,11 @@ Sub FrontMove
     MotorTurn()
     While Motor.GetCount("A") >= -1*(fixedTurn*2)
     EndWhile
+  Else
+    negLocation = 1
+    LocationMapping()
   EndIf
+
   FourMotorsBreak()
 EndSub  
 
@@ -379,7 +383,6 @@ Sub RightMove
   Program.Delay(148)
   M1Stop()
   baseSpeed = moveSpeed
-  LocationMapping()
   FrontMove()
 EndSub
 
@@ -442,7 +445,6 @@ Sub LeftMove
   M1Stop()
   
   baseSpeed = moveSpeed
-  LocationMapping()
   FrontMove()
 EndSub
 
@@ -498,7 +500,6 @@ Sub BackMove
   M1Stop()
   
   baseSpeed = moveSpeed
-  LocationMapping()
   FrontMove()
 EndSub
 
@@ -1148,17 +1149,17 @@ Sub LocationMapping
 For i = 1 To 4
    If trueDirection[i] = trueBearing Then
       If i = 1 Then
-      y = currentY + (1 * -negLocation)
-      x = currentX
+      currentY = currentY + (1 * -negLocation)
+      currentX = currentX
       ElseIf i = 2 Then
-      y = currentY
-      x = currentX + (1 * negLocation)
+      currentY = currentY
+      currentX = currentX + (1 * negLocation)
       ElseIf i = 3 Then
-      y = currentY + (1 * negLocation)
-      x = currentX
+      currentY = currentY + (1 * negLocation)
+      currentX = currentX
       Else
-      y = currentY
-      x = currentX + (1 * -negLocation) 
+      currentY = currentY
+      currentX = currentX + (1 * -negLocation) 
     EndIf
   EndIf
 EndFor
@@ -1378,8 +1379,10 @@ EndSub
 'MAIN CODE
 running = "True"
 rightFollow = "False"
+
 While Done = "False"
   CenterLocation()
+  SetStartFrequency()
   If running = "True" then
     SensorGathering()
     colorRead()
