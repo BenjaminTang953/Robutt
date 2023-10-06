@@ -1,0 +1,41 @@
+
+
+Sub BearingAdjust
+  
+  'convert trueBearing to number
+  If trueBearing = "North" Then
+    bearing = 1
+  ElseIf trueBearing = "East" then
+    bearing = 2
+  elseif trueBearing = "South" then
+    bearing = 3
+  Else
+    bearing = 4
+  EndIf
+  
+  
+  If Turn = "Right" Then 'if turning right
+    bearing = bearing + 1
+  ElseIf Turn = "Back" Then ' of turning back
+    bearing = bearing + 2
+  Else 'if turning left reduce by one
+    bearing = bearing - 1
+  EndIf
+  
+  If bearing < 1 Then
+    bearing = bearing + 4
+  ElseIf bearing > 4 then
+    bearing = bearing -4
+  EndIf
+  
+  If bearing = 1 Then
+    trueBearing = "North"
+  ElseIf bearing = 2 Then
+    trueBearing = "East"
+  elseif bearing = 3 then
+    trueBearing = "South"
+  Else 
+    trueBearing = "West"
+  EndIf
+EndSub
+  
