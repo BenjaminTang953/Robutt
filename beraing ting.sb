@@ -18,7 +18,7 @@ Sub BearingAdjust
     bearing = bearing + 1
   ElseIf Turn = "Back" Then ' of turning back
     bearing = bearing + 2
-  Else 'if turning left reduce by one
+  ElseIf 'If turning left reduce by one
     bearing = bearing - 1
   EndIf
   
