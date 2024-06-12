@@ -101,7 +101,6 @@ sufArray = ""
 mode = ""
 hexAppendRequired = ""
 
-
 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 ' I2C  INIT
 

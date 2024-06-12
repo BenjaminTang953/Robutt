@@ -404,6 +404,64 @@ EndSub
 'Thomas Code Ends Here
 
 
+Sub StartMapping
+    CenterLocation()
+    trueBearing = "North"
+    WallArrayCalculation()
+    SetStartFrequency()
+EndSub
+
+Sub MovePossibility
+  If trueBearing = "North" Then
+    If northWall = "True" Then
+      movePossible[1] = "True"
+    EndIf
+    If eastWall = "True" Then
+      movePossible[2] = "True"
+    EndIf
+    If westWall = "True" Then
+      movePossible[3] = "True"
+    EndIf
+  EndIf
+
+  If trueBearing = "South" Then
+    If southWall = "True" Then
+      movePossible[1] = "True"
+    EndIf
+    If westWall = "True" Then
+      movePossible[2] = "True"
+    EndIf
+    If eastWall = "True" Then
+      movePossible[3] = "True"
+    EndIf
+  EndIf
+
+  If trueBearing = "East" Then
+    If eastWall = "True" Then
+      movePossible[1] = "True"
+    EndIf
+    If southWall = "True" Then
+      movePossible[2] = "True"
+    EndIf
+    If northWall = "True" Then
+      movePossible[3] = "True"
+    EndIf
+  EndIf
+
+  If trueBearing = "West" Then
+    If westWall = "True" Then
+      movePossible[1] = "True"
+    EndIf
+    If northWall = "True" Then
+      movePossible[2] = "True"
+    EndIf
+    If southWall = "True" Then
+      movePossible[3] = "True"
+    EndIf
+  EndIf
+EndSub
+
+
 'Math Calculation Subs
 Sub DecToHex
   decValue = Math.Remainder(decValue, 16)
@@ -437,17 +495,11 @@ If hexAppendRequired = "True" Then
 EndIf
 EndSub
 
-lWall1 = "True"
-rWall1 = "True"
 
-Sub StartMapping
-    CenterLocation()
-    trueBearing = "North"
-    WallArrayCalculation()
-    SetStartFrequency()
-EndSub
 
-StartMapping()
+
+
+
 
 Sub Test
   
@@ -535,11 +587,36 @@ textwindow.writeline(southWall)
 textwindow.writeline(eastWall)
 textwindow.writeline(westWall)
 
+MovePossibility()
+
+For i = 1 to 3
+  textwindow.writeline(movePossible[i])
+EndFor
+
 
 TextWindow.Pause()
 textwindow.clear()
 
 EndSub
+
+
+Sub TestFour
+  
+  trueBearing = "North"
+  northWall = "True"
+  southWall = ""
+  eastWall = "True"
+  westWall = ""
+  MovePossibility()
+  
+For i = 1 to 3
+  textwindow.writeline(movePossible[i])
+EndFor
+Textwindow.Pause()
+  
+  
+EndSub
+
 
 
 While 1 = 1
