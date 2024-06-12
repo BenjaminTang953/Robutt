@@ -1,4 +1,5 @@
 Sub FrontMove
+  LocationMapping()
 EndSub
 Sub RightMove
 EndSub
@@ -197,9 +198,6 @@ Sub WallCalculation
           eastWall = "False"
           If wallCount - 1 >= 0 Then
             northWall = "True"
-          Else
-            northWall = "False"
-            wallCount = "Floating"
           EndIf
         EndIf
       EndIf  
@@ -232,9 +230,11 @@ EndSub
 Sub FrequencyCalculation
   hexValue = Text.GetSubText(mapArray[currentY], currentX  * 3, 1)
   HexToDec()
-  If decValue <= 15 Then
+  If decValue <= 14 Then
     mode = 0
-    change = Text.GetSubText(mapArray[currentY] , currentX  * 3, 1)  + 1
+    decValue = decValue + 1
+    DecToHex()
+    change = hexValue
     ArrayChange()
   EndIf
 EndSub
@@ -258,17 +258,17 @@ Sub LocationMapping
 For i = 1 To 4
    If trueDirection[i] = trueBearing Then
       If i = 1 Then
-      y = currentY + (1 * -negLocation)
-      x = currentX
+      currentY = currentY + (1 * -negLocation)
+      currentX = currentX
       ElseIf i = 2 Then
-      y = currentY
-      x = currentX + (1 * negLocation)
+      currentY = currentY
+      currentX = currentX + (1 * negLocation)
       ElseIf i = 3 Then
-      y = currentY + (1 * negLocation)
-      x = currentX
+      currentY = currentY + (1 * negLocation)
+      currentX = currentX
       Else
-      y = currentY
-      x = currentX + (1 * -negLocation) 
+      currentY = currentY
+      currentX = currentX + (1 * -negLocation) 
     EndIf
   EndIf
 EndFor
@@ -455,11 +455,6 @@ Sub Test
   TextWindow.WriteLine(mapArray[i])
 EndFor
 
-
-textwindow.writeline("X")
-currentX = currentX + textwindow.read()
-textwindow.writeline("Y")
-currentY = currentY + textwindow.read()
 textwindow.writeline("front")
 fWall1 =  textwindow.read()
 textwindow.writeline("left")
@@ -468,10 +463,17 @@ textwindow.writeline("right")
 rWall1 = textwindow.read()
 textwindow.writeline("direction")
 trueBearing = textwindow.read()
+textwindow.writeline("victim")
+victimTrue = textwindow.read()
 
+LocationMapping()
 WallArrayCalculation()
+VictimMapping()
+FrequencyCalculation()
 
-TextWindow.WriteLine(rWall1)
+TextWindow.WriteLine(currentX)
+TextWindow.WriteLine(currentY)
+
 For i = 1 to maxY
   TextWindow.WriteLine(mapArray[i])
 EndFor
@@ -483,6 +485,63 @@ textwindow.clear()
 
 EndSub
 
+
+
+Sub TestTwo
+  
+TextWindow.WriteLine(currentX)
+TextWindow.WriteLine(currentY)
+trueBearing = TextWindow.Read()
+textwindow.writeline("front")
+fWall1 =  textwindow.read()
+textwindow.writeline("left")
+lWall1 = textwindow.read()
+textwindow.writeline("right")
+rWall1 = textwindow.read()
+WallOrientationCalculation()
+TextWindow.WriteLine(wallTotal)
+FrontMove()
+
+  
+  
+  
+  
+'For i = 1 to maxY
+'  TextWindow.WriteLine(mapArray[i])
+'EndFor
+
+TextWindow.Pause()
+textwindow.clear()
+
+
+EndSub
+
+
+Sub TestThree
+
+textwindow.writeline("bearing")
+trueBearing = TextWindow.Read()
+textwindow.writeline("front")
+fWall1 =  textwindow.read()
+textwindow.writeline("left")
+lWall1 = textwindow.read()
+textwindow.writeline("right")
+rWall1 = textwindow.read()
+WallArrayCalculation()
+
+WallCalculation()
+textwindow.writeline(northWall)
+textwindow.writeline(southWall)
+textwindow.writeline(eastWall)
+textwindow.writeline(westWall)
+
+
+TextWindow.Pause()
+textwindow.clear()
+
+EndSub
+
+
 While 1 = 1
-  Test()
-  EndWhile
+  TestThree()
+EndWhile

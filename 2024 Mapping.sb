@@ -1084,9 +1084,6 @@ Sub WallCalculation
           eastWall = "False"
           If wallCount - 1 >= 0 Then
             northWall = "True"
-          Else
-            northWall = "False"
-            wallCount = "Floating"
           EndIf
         EndIf
       EndIf  
@@ -1119,9 +1116,11 @@ EndSub
 Sub FrequencyCalculation
   hexValue = Text.GetSubText(mapArray[currentY], currentX  * 3, 1)
   HexToDec()
-  If decValue <= 15 Then
+  If decValue <= 14 Then
     mode = 0
-    change = Text.GetSubText(mapArray[currentY] , currentX  * 3, 1)  + 1
+    decValue = decValue + 1
+    DecToHex()
+    change = hexValue
     ArrayChange()
   EndIf
 EndSub
