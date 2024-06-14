@@ -8,6 +8,8 @@ EndSub
 Sub BackMove
 EndSub
 
+
+
 'Mapping variables and strings that Ben cannot be bothered to sort out ;P
 northWall = "False"
 southWall = "False"
