@@ -1,0 +1,503 @@
+Sub FrontMove
+EndSub
+Sub RightMove
+EndSub
+Sub LeftMove
+EndSub
+Sub BackMove
+EndSub
+rWall1 = ""
+lWall1 = ""
+fWall1 = ""
+
+
+
+
+'Mapping variables and strings that Ben cannot be bothered to sort out ;P
+northWall = "False"
+southWall = "False"
+eastWall = "False"
+westWall = "True"
+wallTotal = 0
+victimTrue = "False"
+timesVisited = 0
+wallHex = 0
+victimHex = 0
+trueDegree = 0
+trueBearing = ""
+trueDirection[1] = "North"
+trueDirection[2] = "East"
+trueDirection[3] = "South"
+trueDirection[4] = "West"
+maxX = 25
+maxY = 25
+centerX = Math.Ceiling(maxX / 2)
+centerY = Math.Ceiling(maxY / 2)
+changeWallCalc[1] = 0
+changeWallCalc[2] = 1
+changeWallCalc[3] = 2
+changeWallCalc[4] = -1
+valueWallCalcArray[1] = 1
+valueWallCalcArray[2] = 2
+valueWallCalcArray[4] = 4
+differenceWallCalc = 0
+hexString = "0123456789ABCDEF"
+decString = "0123456789"
+decValue = 0 
+currentX = 0
+currentY = 0
+negLocation = 1
+minimumFrequency = 0
+movementPriority[1] = "Front"
+movementPriority[2] = "Right"
+movementPriority[3] = "Left"
+tileFrequency[1] = frontTileFrequency
+tileFrequency[2] = rightTileFrequency
+tileFrequency[3] = leftTileFrequency
+movePossible[1] = "" 'Front move possible
+movePossible[2] = "" 'Right move possible
+movePossible[3] = "" 'Left move possible
+preArray = ""
+change = ""
+sufArray = ""
+mode = ""
+hexAppendRequired = ""
+
+'Mapping Subs and Arrays thingys :D
+
+For i = 1 To maxY
+  For x = 1 To maxX
+    mapArray[i] = Text.Append(mapArray[i] , "000") 'Creates the map
+  EndFor
+EndFor
+
+Sub ArrayChange  'Mode = Wall/Victim/Frequency, Frequency = 0, Victim = 1, Wall = 2
+calcX = (currentX * 3) - mode
+preArray = Text.GetSubText(mapArray[currentY], 1, calcX - 1)
+sufArray = Text.GetSubText(mapArray[currentY], calcX + 1, 75 - calcX)
+mapArray[currentY] = Text.Append(Text.Append(preArray, change) , sufArray)
+EndSub
+
+For i = 1 To 4 'Wall values
+  wallCalcArray[i] = Math.Power(2, (i-1))
+EndFor
+
+wallCalcArray[0] = wallCalcArray[0+4]
+wallCalcArray[5] = wallCalcArray[5-4]
+wallCalcArray[6] = wallCalcArray[6-4]
+
+Sub WallOrientationCalculation 'Takes reading from TOFs in that tile to calculate the "wall total"
+    For i = 1 To 4
+      If trueDirection[i] = trueBearing Then
+        differenceWallCalc = changeWallCalc[i]
+      EndIf
+    EndFor
+      If fWall1 = "True" Then
+        If lWall1 = "True" Then
+          If rWall1 = "True" Then
+            wallTotal = wallCalcArray[1 + differenceWallCalc] + wallCalcArray[2 + differenceWallCalc] + wallCalcArray[4 + differenceWallCalc]
+          Else
+            wallTotal = wallCalcArray[1 + differenceWallCalc] + wallCalcArray[4 + differenceWallCalc]
+          EndIf      
+        Else
+          If rWall1 = "True" Then
+            wallTotal = wallCalcArray[1 + differenceWallCalc] + wallCalcArray[4 + differenceWallCalc]
+          Else
+            wallTotal = wallCalcArray[1 + differenceWallCalc]
+          EndIf
+        EndIf
+      Else
+        If lWall1 = "True" Then
+          If rWall1 = "True" Then
+            wallTotal = wallCalcArray[2 + differenceWallCalc] + wallCalcArray[4 + differenceWallCalc]
+          Else
+            wallTotal = wallCalcArray[4 + differenceWallCalc]
+          EndIf
+        Else
+          If rWall1 = "True" Then
+            wallTotal = wallCalcArray[2 + differenceWallCalc]
+          Else
+            wallTotal = 0
+          EndIf
+        EndIf
+       EndIf
+EndSub
+
+Sub WallCalculation 'Takes data from array to calculate wall orientation 
+  currentWallLayout = Text.GetSubText(mapArray[currentY], currentX * 3  - 2 , 1)
+  hexValue = currentWallLayout
+  HexToDec()
+  currentWallLayout = decValue
+  wallCount = currentWallLayout
+  If currentWallLayout > 0 Then
+    If wallCount - 8 >= 0 Then
+      westWall = "True"
+      wallCount = wallCount - 8
+      If  wallCount - 4 >= 0 Then
+        southWall = "True"
+        wallCount = wallCount - 4
+        If wallCount - 2 >= 0 Then 
+          eastWall = "True"
+          wallCount = wallCount - 2
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
+        Else
+          eastWall = "False"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
+        EndIf
+      Else
+        southWall = "False"
+        If wallCount - 2 >= 0 Then 
+          eastWall = "True"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
+        Else
+          eastWall = "False"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
+        EndIf  
+      EndIf
+    Else
+      westWall = "False"
+      If wallCount - 4 >= 0 Then
+        southWall = "True"
+        wallCount = wallCount - 4
+        If wallCount - 2 >= 0 Then 
+          eastWall = "True"
+          wallCount = wallCount - 2
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
+        Else
+          eastWall = "False"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
+        EndIf
+      Else
+        southWall = "False"
+        If wallCount - 2 >= 0 Then 
+          eastWall = "True"
+          wallCount = wallCount - 2
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          Else
+            northWall = "False"
+          EndIf
+        Else
+          eastWall = "False"
+          If wallCount - 1 >= 0 Then
+            northWall = "True"
+          EndIf
+        EndIf
+      EndIf  
+    EndIf 
+  Else
+    northWall = "False"
+    eastWall = "False"
+    southWall = "False"
+    westWall = "False"
+  EndIf
+EndSub
+
+Sub CenterLocation 'Centers the location
+  currentX = centerX
+  currentY = centerY
+EndSub
+
+Sub VictimMapping 'Changes the victim value in the array
+  If victimTrue = "True" Then
+    mode = 1
+    change = 1
+    ArrayChange()
+  Else
+    mode = 1
+    change = 0
+    ArrayChange()
+  EndIf
+EndSub
+
+Sub FrequencyCalculation 'Changes the frequency in the array
+  hexValue = Text.GetSubText(mapArray[currentY], currentX  * 3, 1)
+  HexToDec()
+  If decValue <= 14 Then
+    mode = 0
+    decValue = decValue + 1
+    DecToHex()
+    change = hexValue
+    ArrayChange()
+  EndIf
+EndSub
+
+Sub SetStartFrequency 'Changes starting frequency in the array
+mode = 0
+change = "1"
+ArrayChange()
+EndSub
+
+Sub WallArrayCalculation 'Takes the wall total and changes it in the array
+WallOrientationCalculation()
+decValue = wallTotal
+DecToHex()
+change = hexValue
+mode = 2
+ArrayChange()
+EndSub
+
+Sub LocationMapping 'Calculates location in the array
+For i = 1 To 4
+   If trueDirection[i] = trueBearing Then
+      If i = 1 Then
+      currentY = currentY + (1 * -negLocation)
+      currentX = currentX
+      ElseIf i = 2 Then
+      currentY = currentY
+      currentX = currentX + (1 * negLocation)
+      ElseIf i = 3 Then
+      currentY = currentY + (1 * negLocation)
+      currentX = currentX
+      Else
+      currentY = currentY
+      currentX = currentX + (1 * -negLocation) 
+    EndIf
+  EndIf
+EndFor
+EndSub
+
+Sub AdjacentTileFrequencyCalculation 'Calculates the frequency of adjacent tiles from the array
+  For i = 1 To 4
+    If trueDirection[i] = trueBearing Then
+      If i = 1 Then 
+      frontTileFrequency = Text.GetSubText(mapArray[currentY - 1], (currentX * 3) - 2, 1)
+      rightTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX + 1) * 3) - 2, 1)
+      leftTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX - 1) * 3) - 2, 1)
+      ElseIf i = 2 Then
+      frontTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX + 1) * 3) - 2, 1)
+      rightTileFrequency = Text.GetSubText(mapArray[currentY + 1], (currentX  * 3) - 2, 1)
+      leftTileFrequency = Text.GetSubText(mapArray[currentY - 1], (currentX  * 3) - 2, 1)
+      ElseIf i = 3 Then
+      frontTileFrequency = Text.GetSubText(mapArray[currentY + 1], (currentX  * 3) - 2, 1)
+      rightTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX - 1) * 3) - 2, 1)
+      leftTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX + 1) * 3) - 2, 1)
+      Else
+      frontTileFrequency = Text.GetSubText(mapArray[currentY - 1], (currentX  * 3) - 2, 1)
+      rightTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX - 1) * 3) - 2, 1)
+      leftTileFrequency = Text.GetSubText(mapArray[currentY], ((currentX + 1) * 3) - 2, 1)
+      EndIf
+     EndIf
+  EndFor
+  EndSub
+
+Sub PriorityCalculation 'Calculates the movement priority
+  If tileFrequency[1] <> tileFrequency[2] and tileFrequency[2] <> tileFrequency[3] Then 'If they all not equal :D
+    If tileFrequency[1] < tileFrequency[2] and tileFrequency[2] < tileFrequency[3] Then 'Front, Right, Left
+      movementPriority[1] = "Front"
+      movementPriority[2] = "Right"
+      movementPriority[3] = "Left"
+    ElseIf tileFrequency[1] < tileFrequency[3] and tileFrequency[3] < tileFrequency[2] Then 'Front, Left, Right
+      movementPriority[1] = "Front"
+      movementPriority[2] = "Left"
+      movementPriority[3] = "Right"
+    ElseIf tileFrequency[2] < tileFrequency[1] and tileFrequency[1] < tileFrequency[3] Then 'Right, Front, Left
+      movementPriority[1] = "Right"
+      movementPriority[2] = "Front"
+      movementPriority[3] = "Left"
+    ElseIf tileFrequency[2] < tileFrequency[3] and tileFrequency[3] < tileFrequency[1] Then 'Right, Left, Front
+      movementPriority[1] = "Right"
+      movementPriority[2] = "Left"
+      movementPriority[3] = "Front"
+    ElseIf tileFrequency[3] < tileFrequency[1] and tileFrequency[1] < tileFrequency[2] Then 'Left, Front, Right
+      movementPriority[1] = "Left"
+      movementPriority[2] = "Front"
+      movementPriority[3] = "Right"
+    ElseIf tileFrequency[3] < tileFrequency[2] < tileFrequency[1] Then 'Left, Right, Front
+      movementPriority[1] = "Left"
+      movementPriority[2] = "Right"
+      movementPriority[3] = "Front"
+    EndIf
+  EndIf
+  If tileFrequency[1] = tileFrequency[2] Or tileFrequency[1] = tileFrequency[3] Or tileFrequency[2] = tileFrequency[3] Then 'If some/all are equal <(-_-<))
+    If tileFrequency[1] = tileFrequency[2] and tileFrequency[1] <> tileFrequency[3] Then 'Front and Right are like the same but the Left is different 
+      If tileFrequency[1] < tileFrequency[3] Then
+        movementPriority[1] = "Right"
+        movementPriority[2] = "Front"
+        movementPriority[3] = "Left"
+      Else
+        movementPriority[1] = "Left"
+        movementPriority[2] = "Right"
+        movementPriority[3] = "Front"
+      EndIf
+    ElseIf tileFrequency[1] = tileFrequency[3] and tileFrequency[1] <> tileFrequency[2] Then 'Front and Left are like the same but the Right is different  
+      If tileFrequency[1] < tileFrequency[2] Then
+        movementPriority[1] = "Front"
+        movementPriority[2] = "Left"
+        movementPriority[3] = "Right"
+      Else
+        movementPriority[1] = "Right"
+        movementPriority[2] = "Front"
+        movementPriority[3] = "Left"
+      EndIf
+    ElseIf tileFrequency[2] = tileFrequency[3] and tileFrequency[2] <> tileFrequency[1] Then 'Right and Left are like the same but the Front is different  
+      If tileFrequency[2] < tileFrequency[1] Then
+        movementPriority[1] = "Right"
+        movementPriority[2] = "Left"
+        movementPriority[3] = "Front"
+      Else
+        movementPriority[1] = "Front"
+        movementPriority[2] = "Right"
+        movementPriority[3] = "Left"
+      EndIf
+    EndIf
+    If tileFrequency[1] = tileFrequency[2] And tileFrequency[2] = tileFrequency[3] Then 'All the same
+      movementPriority[1] = "Right"
+      movementPriority[2] = "Front"
+      movementPriority[3] = "Left"
+    EndIf 
+  EndIf
+EndSub
+
+
+'Thomas Code Starts Here
+Sub PreferentialFollow
+    '1 = Front, 2 = Right, 3 = Left
+    'movePossible [null, T/F, T/F, T/F] (order of F, R, L)
+    'priorityTH [Highest Priority -> Lowest]
+    i = 1
+    leaveTH = "False"
+    While leaveTH = "False" or i > 4 'this will repeat until we move somewhere
+        'This is how you do case statments: 'https://smallbasic.github.io/reference/640.html
+        'check which direction has frequency
+      if movementPriority[i] = "Front" Then
+        'if we can move this direction
+        if movePossible[1] = "True" Then
+          'go this direction then stop checking for priorites
+          FrontMove()
+          leaveTH = "True"
+        endIf
+
+      ElseIf movementPriority[i] = "Right" Then
+        if movePossible[2] = "True" Then
+          RightMove()
+          leaveTH = "True"
+        EndIf
+      ElseIf movementPriority[i] = "Left" Then
+        if movePossible[3] = "True" Then
+          LeftMove()
+          leaveTH = "True"
+        EndIF
+      Else
+        BackMove()
+      EndIf
+      i = i + 1
+    EndWhile
+EndSub
+'Thomas Code Ends Here
+
+
+Sub StartMapping
+    CenterLocation()
+    trueBearing = "North"
+    WallArrayCalculation()
+    SetStartFrequency()
+EndSub
+
+Sub MovePossibility
+  If trueBearing = "North" Then
+    If northWall = "True" Then
+      movePossible[1] = "True"
+    EndIf
+    If eastWall = "True" Then
+      movePossible[2] = "True"
+    EndIf
+    If westWall = "True" Then
+      movePossible[3] = "True"
+    EndIf
+  EndIf
+
+  If trueBearing = "South" Then
+    If southWall = "True" Then
+      movePossible[1] = "True"
+    EndIf
+    If westWall = "True" Then
+      movePossible[2] = "True"
+    EndIf
+    If eastWall = "True" Then
+      movePossible[3] = "True"
+    EndIf
+  EndIf
+
+  If trueBearing = "East" Then
+    If eastWall = "True" Then
+      movePossible[1] = "True"
+    EndIf
+    If southWall = "True" Then
+      movePossible[2] = "True"
+    EndIf
+    If northWall = "True" Then
+      movePossible[3] = "True"
+    EndIf
+  EndIf
+
+  If trueBearing = "West" Then
+    If westWall = "True" Then
+      movePossible[1] = "True"
+    EndIf
+    If northWall = "True" Then
+      movePossible[2] = "True"
+    EndIf
+    If southWall = "True" Then
+      movePossible[3] = "True"
+    EndIf
+  EndIf
+EndSub
+
+
+'Math Calculation Subs
+Sub DecToHex
+  decValue = Math.Remainder(decValue, 16)
+  hexValue = Text.GetSubText(hexString, decValue + 1, 1)
+EndSub
+
+Sub HexToDec
+If hexValue = "A" Then
+  hexValue = 10
+  hexAppendRequired = "True"
+ElseIf hexValue = "B" Then
+  hexValue = 11
+  hexAppendRequired = "True"
+ElseIf hexValue = "C" Then
+  hexValue = 12
+  hexAppendRequired = "True"
+ElseIf hexValue = "D" Then
+  hexValue = 13
+  hexAppendRequired = "True"
+ElseIf hexValue = "E" Then
+  hexValue = 14
+  hexAppendRequired = "True"
+ElseIf hexValue = "F" Then
+  hexValue = 15
+  hexAppendRequired = "True"
+EndIf
+hexValue = Math.Remainder(hexValue, 10)
+decValue = Text.GetSubText(decString, hexValue + 1, 1 )
+If hexAppendRequired = "True" Then
+  decValue = Text.Append("1" , decValue)
+EndIf
+EndSub
