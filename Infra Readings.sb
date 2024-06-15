@@ -1,0 +1,25 @@
+'Busses
+LeftPort = 1
+RightPort = 3
+Multisensor = 2
+LeftTOF = 2
+RightTOF = 4
+
+'infrared
+irAddr = 21
+irReg = 68
+irWriteByte = 1 + 0
+irWriteData = Vector.Init(irWriteByte, irReg)
+irReadByte = 2
+irReadData = Vector.Init(irReadByte, 0)
+wallCounter = 0
+
+LCD.Clear()
+While 1 = 1
+  irReadData = Sensor.CommunicateI2C(LeftPort, irAddr, irWriteByte, irReadByte, irWriteData)
+  lTemp = (irReadData[1]*256 + irReadData[0]) / 100.0
+  irReadData = Sensor.CommunicateI2C(RightPort, irAddr, irWriteByte, irReadByte, irWriteData)
+  rTemp = (irReadData[1]*256 + irReadData[0]) / 100.0
+  LCD.Write(10,10,lTemp+"     ")
+  LCD.Write(10,20,rTemp+"     ")
+EndWhile

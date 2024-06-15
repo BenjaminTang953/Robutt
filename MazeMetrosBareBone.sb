@@ -1,0 +1,472 @@
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+' VARIABLE INIT
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+'Fixed Values 
+LMotor = "B"
+RMotor = "C"
+Motors = "BC"
+moveSpeed = -30 'Moving Speed
+sensorSpeed = 70 'Sensor Block Moving Speed
+dropperSpeed = 14 'Dropper Moving Speed
+dropperTime = 0.23 ' How Long The Dropper Moves For
+fixedTurn = 485 'Turning distance, get past first wall
+radius = 27.5 ' radius of wheel
+distanceFudge = 250 'Fudge factor for moving foward
+circumference = radius*2*Math.Pi ' Circumference of wheel
+degreeDistance = circumference/360 ' Distance of one degree
+fixedMove = ((300/degreeDistance)+distanceFudge) ' Degrees to move one tile
+maxDist1 = 90 'Max Distance The Wall Should Be If It Is 1 Wall Away (Directly In Front)
+maxDistSide1 = 180
+tempVariance = 2.5
+baseSpeed = moveSpeed
+Done = "False"
+drive = "True"
+baseCol = 0
+blackValue = 20
+TOFFudge = 0
+
+
+'Readings in Code
+distSide = 0 ' Distace of side wall for adjustments
+distFront = 0 ' Distance of front wall for adjustments
+averageDirectTemp = 19 'Average Temp Of Non Body Walls
+leftDirectTemp = 0 'Temp Of Left Wall
+rightDirectTemp = 0 'Temp Of Right Wall
+frontDirectTemp = 0 'Temp of Front Wall
+wallCounter = 0 ' counter of walls seen, for averag temp
+pelletCounter = 10 'How Many Pellets Left
+isVictim = "False" 'Does Camera See Victim
+tempVariance = 10 'Range For Dead Or Alive Victim In Temp
+lDist = 0 'Dist To Left Wall
+rDist = 0 'Dist To Right Wall
+fDist = 0 'Dist To Front Wall
+moveDist = 0 'Distance Needed for Adjustment
+lowestDist = 0 ' lowest distance from the wall
+knownDistSide = 152 'How Far From Wall The Robot Should Be From Side
+knownDistFront = 116 'How Far From Wall The Robot Should Be From Front
+lWall1 = "True" 'Is There A Left Wall
+rWall1 = "True" 'Is There A Right Wall
+fWall1 = "True" 'Is There A Front Wall
+data = 0 'thing for gyro calcs :3c
+targetDist = 0
+targetTemp = 0
+numObjects = 0
+turnDeg = 78
+neg = 1
+sensNeg = 1
+startTime = 0
+blackCounter = 0
+blackTile = "False"
+
+
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+' I2C  INIT
+
+'Busses
+LeftPort = 1
+RightPort = 3
+Multisensor = 2
+LeftTOF = 2
+RightTOF = 4
+
+'infrared
+irAddr = 21
+irReg = 68
+irWriteByte = 1 + 0
+irWriteData = Vector.Init(irWriteByte, irReg)
+irReadByte = 2
+irReadData = Vector.Init(irReadByte, 0)
+
+'Camera
+camAddr = 1
+camReg = 66
+camWriteByte = 1 + 0
+camWriteData = Vector.Init(camWriteByte, camReg)
+camReadByte = 1
+camReadData = Vector.Init(camReadByte, 0)
+
+'TOF 
+tofAddr = 1
+tofReg = 66
+tofWriteByte = 1 + 0
+tofWriteData = Vector.Init(tofWriteByte, tofReg)
+tofReadByte = 2
+tofReadData = Vector.Init(tofReadByte, 0)
+
+'Col sensors
+colAddr = 80
+colWriteReg = 82
+colReadReg = 84
+colReadData = Vector.Init(2,0)
+
+'Gyro  - TODO
+
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+'MAIN CODE
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+Sub TOFRead
+  tofReadData = Sensor.CommunicateI2C(LeftPort,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  lDist = (tofReadData[1]*256 + tofReadData[0]) - 30
+  
+  tofReadData = Sensor.CommunicateI2C(RightPort,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  rDist = (tofReadData[1]*256 + tofReadData[0]) - 30
+  
+  tofReadData = Sensor.CommunicateI2C(LeftTOF,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  flDist = (tofReadData[1]*256 + tofReadData[0]) - 30
+  
+  tofReadData = Sensor.CommunicateI2C(RightTOF,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  rlDist = (tofReadData[1]*256 + tofReadData[0]) - 30
+  
+  fDist = (flDist +rlDist)/2
+  fDistDiff = rlDist-flDist-TOFFudge
+EndSub
+
+
+'WALL LOGIC
+Sub lWall1Check 'Checking For Left Wall
+    If maxDistSide1 > lDist Then 'If The Dist To Left Wall Is Less Than The Extreme In 1 Tile
+        lWall1 = "True" 'Then There Is Wall
+    Else 'If Not
+        lWall1 = "False" 'Then There Is No Wall
+    EndIf
+EndSub
+
+
+Sub rWall1Check 'Same as left wall but for right wall
+    If maxDistSide1 > rDist Then
+        rWall1 = "True"
+    Else
+        rWall1 = "False"
+    EndIf  
+EndSub 
+
+Sub fWall1Check 'Once again but for front wall
+    If maxDist1 > fDist Then
+      fWall1 = "True"
+      Speaker.Note(100, "C4", 1000)
+    Else
+        fWall1 = "False"
+    EndIf  
+EndSub
+
+
+'VICTIM LOGIC
+sub VictimCheck
+  
+  VictimOperation()
+EndSub
+
+
+Sub VictimOperation 'PLACEHOLDER
+  Speaker.Note(100,"C4",500)
+EndSub
+
+' WALL LOGIC
+Sub WallCheck
+  TOFRead()
+  If lDist < maxDist1 Then
+    lWall1  = "True"
+  Else
+    lWall1 = "False"
+  EndIf
+  If rDist < maxDist1 Then
+    rWall1  = "True"
+  Else
+    rWall1 = "False"
+  EndIf
+  If fDist < maxDist1 Then
+    fWall1  = "True"
+  Else
+    fWall1 = "False"
+  EndIf
+EndSub
+    
+    
+    
+Sub FrontMove
+  Motor.ResetCount(LMotor)
+  neg = 1
+  Motor.StartSync(Motors, baseSpeed, baseSpeed)
+  
+  drive = "True"
+  colorRead()
+  
+  While drive = "True"
+    colorRead()
+    WallCheck()
+    If math.Abs(Motor.GetCount(LMotor)) > (fixedMove) Then
+      drive = "False"
+    EndIf
+    If blackTile = "True" Or fWall1 = "True" then
+      If Motor.GetCount(LMotor) < -20 then
+        drive = "False"
+      EndIf
+    endif
+  EndWhile
+  
+  
+  If blackTile = "True" Then
+    Motor.StartSync(Motors, -baseSpeed, -baseSpeed)
+    While motor.GetCount(LMotor) > 0
+    EndWhile
+    Motor.ResetCount(LMotor)
+    Motor.StartSync(Motors, -baseSpeed, baseSpeed)
+    While Motor.GetCount(LMotor) >= -1*(fixedTurn*2)+40
+    EndWhile
+  EndIf
+  
+  Motor.Stop(Motors, "True")
+  waitStart = EV3.Time
+  While EV3.Time < waitStart+500
+  EndWhile
+EndSub
+
+sub RightMove
+  Speaker.Note(100,"C4",1000)
+  Motor.ResetCount(LMotor)
+  Motor.StartSync(Motors, baseSpeed, -baseSpeed)
+  
+  If fWall1 = "True" and isVictim = "False" Then
+    While Math.Abs(Motor.GetCount(LMotor)) <= (fixedTurn-140)
+    EndWhile
+    PreciseTurnR()
+  Else
+    While Math.Abs(Motor.GetCount(LMotor)) <= fixedTurn
+    EndWhile
+  EndIf
+  Motor.Stop("ABCD", "True")
+  
+  baseSpeed=moveSpeed
+  FrontMove()
+EndSub
+
+Sub PreciseTurnR
+  finished = "False"
+  TOFRead() 
+  lowestDist = lDist
+  While finished = "False"
+    TOFRead()
+    If lDist < lowestDist then
+      lowestDist = lDist
+    ElseIf lDist > lowestDist then 
+      finished = "True"
+    EndIf
+  EndWhile
+  
+  TOFRead() 
+  lowestDist = lDist
+  baseSpeed = 0.5 * moveSpeed
+  Motor.StartSync(Motors, -baseSpeed, baseSpeed)
+  finished = "False"
+  
+  While finished = "False"
+    TOFRead()
+    If lDist <= lowestDist then
+      lowestDist = lDist
+    ElseIf lDist > lowestDist then 
+      finished = "True"
+    EndIf
+  EndWhile
+EndSub
+
+Sub LeftMove
+  Motor.ResetCount(LMotor)
+  
+  Motor.StartSync(Motors, -baseSpeed, baseSpeed)
+  
+  If fWall1 = "True" and isVictim = "False" Then
+    While Math.Abs(Motor.GetCount(LMotor)) <= (fixedTurn-140)
+    EndWhile
+    PreciseTurnL()
+  Else
+    While Math.Abs(Motor.GetCount(LMotor)) <= fixedTurn
+    EndWhile
+  EndIf
+  
+  Motor.Stop(Motors, "True")
+  
+  baseSpeed = moveSpeed
+  FrontMove()
+EndSub
+
+Sub PreciseTurnL
+  finished = "False"
+  TOFRead() 
+  lowestDist = lDist
+  While finished = "False"
+    TOFRead()
+    If rDist <= lowestDist then
+      lowestDist = rDist
+    ElseIf rDist > lowestDist then 
+      finished = "True"
+    EndIf
+  EndWhile
+  
+  Motor.Stop(Motors, "True")
+  waitTime = 1000
+  Wait()
+  
+  TOFRead() 
+  lowestDist = rDist
+  baseSpeed = 0.5 * moveSpeed
+  Motor.StartSync(Motors, baseSpeed, -baseSpeed)
+  finished = "False"
+  While finished = "False"
+    TOFRead()
+    If lDist <= lowestDist then
+      lowestDist = rDist
+    ElseIf rDist > lowestDist then 
+      finished = "True"
+    EndIf
+  EndWhile
+EndSub  
+
+Sub BackMove
+    
+  Motor.ResetCount(LMotor)
+  neg = -1
+  Motor.StartSync(Motors, moveSpeed, -moveSpeed)
+  
+  While math.Abs(Motor.GetCount(LMotor)) >= ((fixedTurn-40) * 2)
+  EndWhile
+  
+  PreciseTurnB()
+  Motor.Stop(Motors, "True")
+  FrontMove()
+EndSub
+
+Sub PreciseTurnB
+  finished = "False"
+  TOFRead() 
+  lowestDist = lDist
+  While finished = "False"
+    TOFRead()
+    If lDist < lowestDist then
+      lowestDist = lDist
+    ElseIf lDist > lowestDist then 
+      finished = "True"
+    EndIf
+  EndWhile
+  
+  finished = "False"
+  
+  TOFRead() 
+  lowestDist = lDist
+  baseSpeed = 0.5 * moveSpeed
+  Motor.StartSync(Motors, baseSpeed, -baseSpeed)
+  finished = "False"
+  
+  While finished = "False"
+    TOFRead()
+    If lDist <= lowestDist then
+      lowestDist = lDist
+    ElseIf lDist > lowestDist then 
+      finished = "True"
+    EndIf
+  EndWhile
+EndSub
+  
+'SENSOR SUBS
+sub colorRead
+  colReadData = Sensor.ReadI2CRegisters(Multisensor, colAddr, colReadReg, 2)
+  light = colReadData[1] *256 + colReadData[0]
+  
+  
+  If light < blackValue Then
+    blackCounter = blackCounter + 1
+  Else
+    blackCounter = 0
+  EndIf
+  
+  blackTile = "False"
+  If blackCounter= 3 Then
+    blackTile = "True"
+    Speaker.Note(100,"C4", 1000)
+  EndIf
+EndSub
+
+'MAIN LOGIC
+Sub RightWallFollow
+    If rWall1 = "True" Then
+        If lWall1 = "True" Then
+            If fWall1 = "True" Then
+              BackMove()
+              Speaker.Note(100,"C4",1000)
+            Else
+                FrontMove()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                LeftMove()
+            Else
+                FrontMove()
+            EndIf
+        EndIf
+    Else
+        If lWall1 = "True" Then
+            If fWall1 = "True" Then
+                RightMove()
+            Else
+                RightMove()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                RightMove()
+            Else
+                RightMove()
+            EndIf
+        EndIf
+    EndIf
+EndSub
+  
+Sub LeftWallFollow 
+    If lWall1 = "True" Then
+        If rWall1 = "True" Then
+            If fWall1 = "True" Then
+                BackMove()
+            Else
+                FrontMove()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                RightMove()
+            Else
+                FrontMove()
+            EndIf
+        EndIf
+    Else
+        If rWall1 = "True" Then
+            If fWall1 = "True" Then
+                LeftMove()
+            Else
+                LeftMove()
+            EndIf
+        Else
+            If fWall1 = "True" Then
+                LeftMove()
+            Else
+                LeftMove()
+            EndIf
+        EndIf
+    EndIf
+EndSub  
+
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+running = "True"
+
+While running = "True" 
+  If running = "True" Then
+    WallCheck()
+    RightWallFollow()
+  EndIf
+EndWhile    
+
+Sub Wait
+  waitStart = EV3.Time
+  While EV3.Time < waitStart+waitTime
+  EndWhile
+EndSub

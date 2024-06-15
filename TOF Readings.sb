@@ -1,0 +1,39 @@
+'Busses
+LeftPort = 1
+RightPort = 3
+Multisensor = 2
+LeftTOF = 2
+RightTOF = 4
+TOFFudge = 0
+
+'TOF 
+tofAddr = 1
+tofReg = 66
+tofWriteByte = 1 + 0
+tofWriteData = Vector.Init(tofWriteByte, tofReg)
+tofReadByte = 2
+tofReadData = Vector.Init(tofReadByte, 0)
+LCD.Clear()
+While 1 = 1
+  tofReadData = Sensor.CommunicateI2C(LeftPort,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  lDist = (tofReadData[1]*256 + tofReadData[0]) - 30
+  
+  tofReadData = Sensor.CommunicateI2C(RightPort,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  rDist = (tofReadData[1]*256 + tofReadData[0]) - 30
+  
+  tofReadData = Sensor.CommunicateI2C(LeftTOF,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  flDist = (tofReadData[1]*256 + tofReadData[0]) - 30
+  
+  tofReadData = Sensor.CommunicateI2C(RightTOF,tofAddr, tofWriteByte, tofReadByte, tofWriteData)
+  frDist = (tofReadData[1]*256 + tofReadData[0]) - 30
+  
+  fDist = (flDist + frDist)/2
+  fDistDiff = frDist-flDist-TOFFudge
+  LCD.Write(10,10,lDist+"     ")
+  LCD.Write(10,20,rDist+"     ")
+  LCD.Write(10,30,fDist+"     ")
+  LCD.Write(10,40,fDistDiff+"      ")
+  LCD.Write(10,50,flDist+"     ")
+  LCD.Write(10,6d0,frDist+"     ")
+  
+EndWhile

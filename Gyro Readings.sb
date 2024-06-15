@@ -1,0 +1,28 @@
+'Busses
+LeftPort = 1
+RightPort = 3
+Multisensor = 2
+LeftTOF = 2
+RightTOF = 4
+TOFFudge = 0
+
+'GyroZ
+GyroZAddr = 82
+GyroWriteReg = 82
+GyroReadReg = 84
+gyroWriteByte = 1 + 0
+gyroWriteData = Vector.Init(gyroWriteByte, GyroReadReg)
+gyroReadByte = 2
+GyroReadData = Vector.Init(2,0)
+
+Sensor.WriteI2CRegister(Multisensor,GyroZAddr, GyroWriteReg, 0)
+LCD.Clear()
+While 1 = 1
+  GyroReadData = Sensor.CommunicateI2C(Multisensor, GyroZAddr, gyroWriteByte, gyroReadByte, gyroWriteData)
+  gyroData = (GyroReadData[1]*256 + GyroReadData[0])
+  If (gyroData > 32767) Then
+    gyroData = (gyroData - 65536)
+  EndIf
+  
+  LCD.Write(10,10, gyroData + "             ")
+EndWhile
